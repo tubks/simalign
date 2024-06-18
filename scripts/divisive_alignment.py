@@ -271,13 +271,25 @@ class SentenceAligner(object):
 		sim = self.get_similarity(vectors[0], vectors[1])
 		return sim
 
-source_sentence = "Sir Nils Olav III. was knighted by the norwegian king ."
-target_sentence = "Nils Olav der Dritte wurde vom norwegischen König zum Ritter geschlagen ."
+
+def align(s, t):
+    if len(s)==1 or len(t)==1:
+		for word_s in s:
+			for word_t in t:
+				file.write(f'{word_s}-{word_t}')    # should the cases containing more than 1 word be saved as possible links?
+	minNcut = 2
+	x, y = s, t
+    align()
+def Ncut(A, B):
+	pass
 # ali_xml_paths = ["dat/LAuberge_TheInn.ali.xml", "dat/BarbeBleue_BlueBeard.ali.xml",
                     #  "dat/ChatBotte_MasterCat.ali.xml", "dat/Laderniereclasse_Thelastlesson.ali.xml", "dat/LaVision_TheVision.ali.xml"]
 path = "dat/ChatBotte_MasterCat.ali.xml"
-model = SentenceAligner()
+model = SentenceAligner()   # simalign custom class
 
 sentence_tuples = extract_sentences(path, is_path=True)
 for source_sentence, target_sentence in sentence_tuples:
     sim = model.get_similarity_matrix(source_sentence, target_sentence)
+	source = source_sentence.split()
+	target = target_sentence.split()
+    align(source, target)
