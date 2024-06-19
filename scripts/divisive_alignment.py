@@ -16,20 +16,20 @@ from transformers import BertModel, BertTokenizer, XLMModel, XLMTokenizer, Rober
 
 
 def extract_sentences(soup_or_path, is_path=False):
-    if is_path:
-        with open(soup_or_path, 'r') as filehandle:
-            soup = BeautifulSoup(filehandle, 'xml')
-    # the first linkList contains linkGroups with all the alignments (linkList level='chunk')
-    linkGroups = soup.linkList.find_all('linkGroup')
-    sentence_tuples = []
-    for linkGroup in linkGroups:
-        links = linkGroup.find_all('link')
-        for link in links:
-            if link['parentID'] == "ROOT":
-                spans = link.find_all('docSpan')
-                sentence_tuples.append(
-                    (spans[0].string, spans[1].string))
-    return sentence_tuples
+	if is_path:
+		with open(soup_or_path, 'r') as filehandle:
+			soup = BeautifulSoup(filehandle, 'xml')
+	# the first linkList contains linkGroups with all the alignments (linkList level='chunk')
+	linkGroups = soup.linkList.find_all('linkGroup')
+	sentence_tuples = []
+	for linkGroup in linkGroups:
+		links = linkGroup.find_all('link')
+		for link in links:
+			if link['parentID'] == "ROOT":
+				spans = link.find_all('docSpan')
+				sentence_tuples.append(
+					(spans[0].string, spans[1].string))
+	return sentence_tuples
 
 class EmbeddingLoader(object):
 	def __init__(self, model: str="bert-base-multilingual-cased", device=torch.device('cpu'), layer: int=8):
@@ -270,26 +270,67 @@ class SentenceAligner(object):
 
 		sim = self.get_similarity(vectors[0], vectors[1])
 		return sim
+	
 
+def W(X,Y): # TODO: use prefix sums
+	# print(f'W: {X},{Y}')
+	return np.sum(sim[X[0]:X[-1]][Y[0]:Y[-1]])
+def cut(X,Y, X_bar, Y_bar):
+	# A, A_bar = X[:cut_x], X[cut_x:]
+	# B, B_bar = Y[:cut_y], Y[cut_y:]
+	# print("cut:",X,Y,X_bar,Y_bar)
+	return W(X, Y_bar)+W(X_bar, Y)
+def Ncut(X, Y, X_bar, Y_bar):
+	# A, A_bar = X[:cut_x], X[cut_x:]
+	# B, B_bar = Y[:cut_y], Y[cut_y:]
+	# print('ncut:',X,Y,X_bar,Y_bar)
+	return cut(X,Y,X_bar, Y_bar)/(cut(X,Y,X_bar, Y_bar)+2*W(X,Y))+cut(X_bar, Y_bar, X, Y)/(cut(X_bar, Y_bar, X, Y)+2*W(X_bar, Y_bar))
 
-def align(s, t):
-    if len(s)==1 or len(t)==1:
-		for word_s in s:
-			for word_t in t:
-				file.write(f'{word_s}-{word_t}')    # should the cases containing more than 1 word be saved as possible links?
+def align(S,T):
+	print(S, T)
+	if len(S)==1 or len(T)==1:
+		print(S,T,"should terminate right?")
+		for word_s in S:
+			for word_t in T:
+				with open("ali_div_chat_botte.txt", 'a+') as file:
+					file.write(f'{word_s+1}-{word_t+1} ')    # should the cases containing more than 1 word be saved as possible links?
+		return S,T # terminate the procedure
 	minNcut = 2
-	x, y = s, t
-    align()
-def Ncut(A, B):
-	pass
+	X,Y = S,T
+	# print(X,Y)
+	# loop over the indices that will be the cutting points
+	for i in range(2,len(S)):
+		for j in range(2,len(T)):
+			A = S[:i]
+			B = T[:j]
+			A_bar = S[i:]
+			B_bar = T[j:]
+			print(A,B,A_bar,B_bar)
+			print(Ncut(A,B, A_bar, B_bar))
+			print(Ncut(A, B_bar, A_bar, B))
+			if Ncut(A,B, A_bar, B_bar)<minNcut:
+				minNcut = Ncut(A,B, A_bar, B_bar)
+				X,Y = A, B
+				X_bar, Y_bar = A_bar, B_bar
+			if Ncut(A, B_bar, A_bar, B)<minNcut:
+				minNcut = Ncut(A, B_bar, A_bar, B)
+				X,Y = A, B_bar
+				X_bar, Y_bar = A_bar, B
+	align(X,Y)
+	align(X_bar, Y_bar)
+
 # ali_xml_paths = ["dat/LAuberge_TheInn.ali.xml", "dat/BarbeBleue_BlueBeard.ali.xml",
-                    #  "dat/ChatBotte_MasterCat.ali.xml", "dat/Laderniereclasse_Thelastlesson.ali.xml", "dat/LaVision_TheVision.ali.xml"]
+					#  "dat/ChatBotte_MasterCat.ali.xml", "dat/Laderniereclasse_Thelastlesson.ali.xml", "dat/LaVision_TheVision.ali.xml"]
 path = "dat/ChatBotte_MasterCat.ali.xml"
-model = SentenceAligner()   # simalign custom class
+model = SentenceAligner(token_type='word')   # simalign class
 
 sentence_tuples = extract_sentences(path, is_path=True)
 for source_sentence, target_sentence in sentence_tuples:
-    sim = model.get_similarity_matrix(source_sentence, target_sentence)
-	source = source_sentence.split()
-	target = target_sentence.split()
-    align(source, target)
+	print(source_sentence, target_sentence)
+	sim = model.get_similarity_matrix(source_sentence, target_sentence)
+	print(sim)
+	source = [i for i in range(len(source_sentence.split()))] # list containing word indices
+	target = [i for i in range(len(target_sentence.split()))]
+	#print(source, target)
+	align(source, target)
+	print(source_sentence)
