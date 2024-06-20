@@ -270,83 +270,24 @@ class SentenceAligner(object):
 
 		sim = self.get_similarity(vectors[0], vectors[1])
 		return sim
-
-def W(X,Y): # TODO: use prefix sums
-	# print(f'W: {X},{Y}')
-	# print("matrix slice:", X[0],X[-1],Y[0],Y[-1])
-	if len(X)==1 and len(Y)==1:
-		return np.sum(sim[X[0],Y[0]])
-	elif len(X)==1 and len(Y)!=1:
-		return np.sum(sim[X[0],Y[0]:Y[-1]])
-	elif len(X)!=1 and len(Y)==1:
-		return np.sum(sim[X[0]:X[-1],Y[0]])
-	else:
-		return np.sum(sim[X[0]:X[-1],Y[0]:Y[-1]])
-def cut(X,Y, X_bar, Y_bar):
-	# print("cut:",X,Y,X_bar,Y_bar)
-	return W(X, Y_bar)+W(X_bar, Y)
-def Ncut(X, Y, X_bar, Y_bar, variant=False):
-	if variant:
-		return cut(X,Y,X_bar, Y_bar)/(cut(X,Y,X_bar, Y_bar)+2*W(X,Y))+cut(X_bar, Y_bar, X, Y)/(cut(X_bar, Y_bar, X, Y)+2*W(X_bar, Y_bar))
-	# print('ncut:',X,Y,X_bar,Y_bar)
-	return cut(X,Y,X_bar, Y_bar)/(cut(X,Y,X_bar, Y_bar)+2*W(X,Y))+cut(X_bar, Y_bar, X, Y)/(cut(X_bar, Y_bar, X, Y)+2*W(X_bar, Y_bar))
-
-def align(S,T):
-	print("START ",S, T)
-	if len(S)==1 or len(T)==1:
-		for word_s in S:
-			for word_t in T:
-				with open(path_to_save, 'a+') as file:
-					print("END", word_s, word_t)
-					file.write(f'{word_s}-{word_t} ')    # should the cases containing more than 1 word be saved as possible links?
-		return S,T # terminate the procedure
 	
-	minNcut = 2
-	X,Y = S,T
-	# print(X,Y) 
-	# loop over the indices that will be the cutting points
-	for i in range(1,len(S)):
-		for j in range(1,len(T)):
-			A = S[:i]
-			B = T[:j]
-			A_bar = S[i:]
-			B_bar = T[j:]
-			print(A,B,A_bar,B_bar)
-			print(Ncut(A,B, A_bar, B_bar))
-			print(Ncut(A, B_bar, A_bar, B))
-			newNcut = Ncut(A,B, A_bar, B_bar)
-			if newNcut<minNcut:
-				minNcut = newNcut
-				print("minNcut update", minNcut)
-				X,Y = A, B
-				X_bar, Y_bar = A_bar, B_bar
-			newNcut = Ncut(A, B_bar, A_bar, B)
-			if newNcut<minNcut:
-				minNcut = newNcut
-				print("minNcut update", minNcut)
-				X,Y = A, B_bar
-				X_bar, Y_bar = A_bar, B
-	align(X,Y)
-	align(X_bar, Y_bar)
+	
+def build_prefix_array(sim_array):
+	prefix_array = np.zeros(sim_array.shape)
+	prefix_array[0][0] = sim_array[0][0]
+	for i in range (sim_array.shape[0]):
+		prefix_array[0][i] = sim_array[0][i]
+	for j in range (sim_array.shape[1]):
+		prefix_array[j][0] = sim_array[j][0]
 
-# ali_xml_paths = ["dat/LAuberge_TheInn.ali.xml", "dat/BarbeBleue_BlueBeard.ali.xml",
-					#  "dat/ChatBotte_MasterCat.ali.xml", "dat/Laderniereclasse_Thelastlesson.ali.xml", "dat/LaVision_TheVision.ali.xml"]
-path = "dat/BarbeBleue_BlueBeard.ali.xml"
-path_to_save = "ali_div_barbe2.txt"
-
+ali_xml_paths = ["dat/LAuberge_TheInn.ali.xml", "dat/BarbeBleue_BlueBeard.ali.xml","dat/Laderniereclasse_Thelastlesson.ali.xml", "dat/LaVision_TheVision.ali.xml"]
 model = SentenceAligner(token_type='word')   # simalign class
-
-sentence_tuples = extract_sentences(path, is_path=True)
-for num, tup in enumerate(sentence_tuples):
-	source_sentence, target_sentence = tup
-	print(source_sentence, target_sentence)
-	sim = model.get_similarity_matrix(source_sentence, target_sentence)
-	print(sim)
-	source = [i for i in range(len(source_sentence.split()))] # list containing word indices
-	target = [i for i in range(len(target_sentence.split()))]
-	#print(source, target)
-	with open(path_to_save, 'a+') as file:
-		file.write(f'{num}\t')
-	align(source, target)
-	with open(path_to_save, 'a+') as file:
-		file.write('\n')
+for path in ali_xml_paths:
+    sentence_tuples = extract_sentences(path, is_path=True)
+    maxs=[]
+    mins=[]
+    for num, tup in enumerate(sentence_tuples):
+        source_sentence, target_sentence = tup
+        # print(source_sentence, target_sentence)
+        sim = model.get_similarity_matrix(source_sentence, target_sentence)
+        build_prefix_array(sim)
