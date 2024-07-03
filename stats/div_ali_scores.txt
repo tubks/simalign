@@ -1,0 +1,38 @@
+
+Auberge                 Prec: 0.588     Rec: 0.718      F1: 0.647       AER: 0.367
+A_cubed                 Prec: 0.689     Rec: 0.841      F1: 0.757       AER: 0.26
+A_4                     Prec: 0.697     Rec: 0.856      F1: 0.768       AER: 0.249
+
+Barbe                   Prec: 0.532     Rec: 0.685      F1: 0.599       AER: 0.419
+B_cubed                 Prec: 0.624     Rec: 0.816      F1: 0.707       AER: 0.316
+B_4                     Prec: 0.635     Rec: 0.828      F1: 0.719       AER: 0.305
+
+Chat                    Prec: 0.555     Rec: 0.688      F1: 0.614       AER: 0.399
+Chat_Normalized_Squared Prec: 0.585     Rec: 0.731      F1: 0.65        AER: 0.364
+Chat_Cosinus            Prec: 0.599     Rec: 0.747      F1: 0.665       AER: 0.35
+Chat_Cosinus_Squared    Prec: 0.629     Rec: 0.789      F1: 0.7         AER: 0.317
+Chat_cubed              Prec: 0.65      Rec: 0.817      F1: 0.724       AER: 0.293
+Chat_4                  Prec: 0.666     Rec: 0.834      F1: 0.741       AER: 0.276
+
+Derniere                Prec: 0.625     Rec: 0.748      F1: 0.681       AER: 0.336
+D_cubed                 Prec: 0.715     Rec: 0.867      F1: 0.784       AER: 0.236
+D_4                     Prec: 0.722     Rec: 0.884      F1: 0.795       AER: 0.227
+
+Vision                  Prec: 0.608     Rec: 0.738      F1: 0.667       AER: 0.347
+V_cubed                 Prec: 0.684     Rec: 0.845      F1: 0.756       AER: 0.262
+V_4                     Prec: 0.687     Rec: 0.848      F1: 0.759       AER: 0.258
+auberge:
+FR:  Counter({1: 4580, 2: 531, 3: 8, 4: 2}) ENG:  Counter({1: 4389, 2: 723, 3: 9})
+total leaves found: 5121
+barbe:
+FR:  Counter({1: 1676, 2: 230, 3: 3}) ENG:  Counter({1: 1604, 2: 288, 3: 15, 4: 1, 5: 1})
+total leaves found: 1909
+chat len distributions:
+FR:  Counter({1: 1563, 2: 146, 3: 2}) ENG:  Counter({1: 1404, 2: 289, 3: 18})
+total leaves found: 1711
+derniereClasse:
+FR:  Counter({1: 1491, 2: 263, 3: 8, 4: 1}) ENG:  Counter({1: 1594, 2: 166, 3: 3})
+total leaves found: 1763
+vision:
+FR:  Counter({1: 2167, 2: 359, 3: 9}) ENG:  Counter({1: 2287, 2: 241, 3: 7})
+total leaves found: 2535

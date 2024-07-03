@@ -118,7 +118,22 @@ class SentenceAligner(object):
 	@staticmethod
 	def get_similarity(X: np.ndarray, Y: np.ndarray) -> np.ndarray:
 		return (cosine_similarity(X, Y) + 1.0) / 2.0
-
+	
+	@staticmethod
+	def get_similarity_cos_squared(X: np.ndarray, Y: np.ndarray) -> np.ndarray:
+		return cosine_similarity(X,Y)**2
+	
+	@staticmethod
+	def get_similarity_normalized_squared(X: np.ndarray, Y: np.ndarray) -> np.ndarray:
+		return ((cosine_similarity(X, Y) + 1.0) / 2.0)**2
+	
+	@staticmethod
+	def get_similarity_cosine(X: np.ndarray, Y: np.ndarray) -> np.ndarray:
+		return cosine_similarity(X, Y)
+	@staticmethod
+	def get_similarity_cos_cubed(X: np.ndarray, Y: np.ndarray) -> np.ndarray:
+		return cosine_similarity(X, Y)**3
+	
 	@staticmethod
 	def average_embeds_over_words(bpe_vectors: np.ndarray, word_tokens_pair: List[List[str]]) -> List[np.array]:
 		w2b_map = []
@@ -268,26 +283,50 @@ class SentenceAligner(object):
 		if self.token_type == "word":
 			vectors = self.average_embeds_over_words(vectors, [l1_tokens, l2_tokens])
 
-		sim = self.get_similarity(vectors[0], vectors[1])
-		return sim
+		sim1 = self.get_similarity(vectors[0], vectors[1])
+		sim2 = self.get_similarity_cosine(vectors[0], vectors[1])
+		sim3 = self.get_similarity_cos_squared(vectors[0], vectors[1])
+		sim4 = self.get_similarity_normalized_squared(vectors[0], vectors[1])
+		sim5 = self.get_similarity_cos_cubed(vectors[0], vectors[1])
+		return sim1, sim2, sim3, sim4, sim5
 	
 	
 def build_prefix_array(sim_array):
 	prefix_array = np.zeros(sim_array.shape)
-	prefix_array[0][0] = sim_array[0][0]
-	for i in range (sim_array.shape[0]):
-		prefix_array[0][i] = sim_array[0][i]
-	for j in range (sim_array.shape[1]):
-		prefix_array[j][0] = sim_array[j][0]
+	prefix_array[0,0] = sim_array[0,0]
+	print(sim_array.shape, sim_array)
+	for i in range(1,sim_array.shape[0]):
+		prefix_array[i,0] = prefix_array[i-1,0]+sim_array[i,0]
+	for j in range(1,sim_array.shape[1]):
+		prefix_array[0,j] = prefix_array[0,j-1]+sim_array[0,j]
+	for i in range(1, sim_array.shape[0]):
+		for j in range(1,sim_array.shape[1]):
+			prefix_array[i,j]=prefix_array[i-1,j]+prefix_array[i,j-1]-prefix_array[i-1,j-1]+sim_array[i,j]
+	return prefix_array
 
-ali_xml_paths = ["dat/LAuberge_TheInn.ali.xml", "dat/BarbeBleue_BlueBeard.ali.xml","dat/Laderniereclasse_Thelastlesson.ali.xml", "dat/LaVision_TheVision.ali.xml"]
+
+def compute_score_from_prefix_array(prefix_array,row_start,row_end, col_start,col_end):
+	if row_start==0 and col_start==0:
+		return prefix_array[row_end,col_end]
+	if row_start==0:
+		return prefix_array[row_end,col_end]-prefix_array[row_end,col_start]
+	if col_start==0:
+		return prefix_array[row_end,col_end]-prefix_array[row_start,col_end]
+	return prefix_array[row_end,col_end]-prefix_array[row_end,col_start]-prefix_array[row_start,col_end]+prefix_array[row_start,col_start]
+ali_xml_paths = ["dat/xml_ali/ChatBotte_MasterCat.ali.xml"]
+# ali_xml_paths = ["dat/xml_ali/LAuberge_TheInn.ali.xml"]
+# ,"dat/xml_ali/Laderniereclasse_Thelastlesson.ali.xml", "dat/xml_ali/LaVision_TheVision.ali.xml"]
 model = SentenceAligner(token_type='word')   # simalign class
 for path in ali_xml_paths:
-    sentence_tuples = extract_sentences(path, is_path=True)
-    maxs=[]
-    mins=[]
-    for num, tup in enumerate(sentence_tuples):
-        source_sentence, target_sentence = tup
-        # print(source_sentence, target_sentence)
-        sim = model.get_similarity_matrix(source_sentence, target_sentence)
-        build_prefix_array(sim)
+	sentence_tuples = extract_sentences(path, is_path=True)
+	maxs=[]
+	mins=[]
+	for num, tup in enumerate(sentence_tuples):
+		source_sentence, target_sentence = tup
+		# print(source_sentence, target_sentence)
+		sims = model.get_similarity_matrix(source_sentence, target_sentence)
+		# b = build_prefix_array(sim)
+		for i,sim in enumerate(sims):
+			print(i,"\n\n")
+			print(sim)
+		break
