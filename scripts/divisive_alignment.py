@@ -121,10 +121,6 @@ class SentenceAligner(object):
 		return (cosine_similarity(X, Y) + 1.0) / 2.0
 	
 	@staticmethod
-	def get_similarity_cos_squared(X: np.ndarray, Y: np.ndarray) -> np.ndarray:
-		return cosine_similarity(X,Y)**4
-	
-	@staticmethod
 	def get_similarity_normalized_squared(X: np.ndarray, Y: np.ndarray) -> np.ndarray:
 		return ((cosine_similarity(X, Y) + 1.0) / 2.0)**2
 	
@@ -132,6 +128,16 @@ class SentenceAligner(object):
 	def get_similarity_cosine(X: np.ndarray, Y: np.ndarray) -> np.ndarray:
 		return cosine_similarity(X, Y)
 	
+	@staticmethod
+	def get_similarity_cos_squared(X: np.ndarray, Y: np.ndarray) -> np.ndarray:
+		return cosine_similarity(X,Y)**2
+	
+	@staticmethod
+	def get_similarity_cos_cubed(X: np.ndarray, Y: np.ndarray) -> np.ndarray:
+		return cosine_similarity(X, Y)**3
+	@staticmethod
+	def get_similarity_cos_pow4(X: np.ndarray, Y: np.ndarray) -> np.ndarray:
+		return cosine_similarity(X, Y)**4
 	@staticmethod
 	def average_embeds_over_words(bpe_vectors: np.ndarray, word_tokens_pair: List[List[str]]) -> List[np.array]:
 		w2b_map = []
@@ -281,7 +287,7 @@ class SentenceAligner(object):
 		if self.token_type == "word":
 			vectors = self.average_embeds_over_words(vectors, [l1_tokens, l2_tokens])
 
-		sim = self.get_similarity_cos_squared(vectors[0], vectors[1])
+		sim = self.get_similarity_cos_pow4(vectors[0], vectors[1])
 		return sim
 
 def build_prefix_array(sim_array):
@@ -351,13 +357,15 @@ def Ncut(X, Y, X_bar, Y_bar):
 def align(S,T):
 	# print("START ",S, T)
 	if len(S)==1 or len(T)==1:
+		# if W(S,T)>0.1: # seuil
 		fr_lens.append(len(S))
 		eng_lens.append(len(T))
 		for word_s in S:
 			for word_t in T:
-				with open(path_to_save, 'a+') as file:
-					# print("END", word_s, word_t)
-					file.write(f'{word_s}-{word_t} ')    # should the cases containing more than 1 word be saved as possible links?
+				if W([word_s],[word_t])>0.1: # seuil
+					with open(path_to_save, 'a+') as file:
+						# print("END", word_s, word_t)
+						file.write(f'{word_s}-{word_t} ')    # should the cases containing more than 1 word be saved as possible links?
 		return S,T # terminate the procedure
 	
 	minNcut = 2
@@ -399,35 +407,35 @@ def align(S,T):
 
 ali_xml_paths = ["dat/xml_ali/LAuberge_TheInn.ali.xml", "dat/xml_ali/BarbeBleue_BlueBeard.ali.xml", "dat/xml_ali/Laderniereclasse_Thelastlesson.ali.xml", "dat/xml_ali/LaVision_TheVision.ali.xml"]
 path = "dat/xml_ali/ChatBotte_MasterCat.ali.xml"
-
 model = SentenceAligner(token_type='word')   # simalign class
-for i,path in enumerate(ali_xml_paths):
-	path_to_save = f'{i}_puissance_4.txt'
-	sentence_tuples = extract_sentences(path, is_path=True)
-	# minCuts = []
-	# maxCuts = []
-	fr_lens = []
-	eng_lens = []
-	for num, tup in enumerate(sentence_tuples):
-		source_sentence, target_sentence = tup
-		# print(source_sentence, target_sentence)
-		print(num)
-		sim = model.get_similarity_matrix(source_sentence, target_sentence)
-		# print(sim)
-		prefix_array = build_prefix_array(sim)
-		source = [i for i in range(len(source_sentence.split()))] # list containing word indices
-		target = [i for i in range(len(target_sentence.split()))]
-		#print(source, target)
-		with open(path_to_save, 'a+') as file:
-			file.write(f'{num}\t')
-		align(source, target)
-		with open(path_to_save, 'a+') as file:
-			file.write('\n')
-	# minCuts.sort()
-	# print(maxCuts, minCuts)
-	# print(len(minCuts), minCuts[:10])
-	# maxCuts.sort(reverse=True)
-	# print(len(maxCuts), maxCuts[:10])
-	# counter_fr = Counter(fr_lens)
-	# counter_eng = Counter(eng_lens)
-	# print("FR: ",counter_fr,"ENG: ", counter_eng)
+# for i,path in enumerate(ali_xml_paths):
+	# path_to_save = f'{i}_seuil_01_inner.txt'
+path_to_save = "chat_get_distr.txt"
+sentence_tuples = extract_sentences(path, is_path=True)
+# minCuts = []
+# maxCuts = []
+fr_lens = []
+eng_lens = []
+for num, tup in enumerate(sentence_tuples):
+	source_sentence, target_sentence = tup
+	# print(source_sentence, target_sentence)
+	print(num)
+	sim = model.get_similarity_matrix(source_sentence, target_sentence)
+	# print(sim)
+	prefix_array = build_prefix_array(sim)
+	source = [i for i in range(len(source_sentence.split()))] # list containing word indices
+	target = [i for i in range(len(target_sentence.split()))]
+	#print(source, target)
+	with open(path_to_save, 'a+') as file:
+		file.write(f'{num}\t')
+	align(source, target)
+	with open(path_to_save, 'a+') as file:
+		file.write('\n')
+# minCuts.sort()
+# print(maxCuts, minCuts)
+# print(len(minCuts), minCuts[:10])
+# maxCuts.sort(reverse=True)
+# print(len(maxCuts), maxCuts[:10])
+counter_fr = Counter(fr_lens)
+counter_eng = Counter(eng_lens)
+print("FR: ",counter_fr,"ENG: ", counter_eng)

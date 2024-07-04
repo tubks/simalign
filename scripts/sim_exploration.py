@@ -133,7 +133,9 @@ class SentenceAligner(object):
 	@staticmethod
 	def get_similarity_cos_cubed(X: np.ndarray, Y: np.ndarray) -> np.ndarray:
 		return cosine_similarity(X, Y)**3
-	
+	@staticmethod
+	def get_similarity_cos_power4(X: np.ndarray, Y: np.ndarray) -> np.ndarray:
+		return cosine_similarity(X, Y)**4
 	@staticmethod
 	def average_embeds_over_words(bpe_vectors: np.ndarray, word_tokens_pair: List[List[str]]) -> List[np.array]:
 		w2b_map = []
@@ -288,7 +290,8 @@ class SentenceAligner(object):
 		sim3 = self.get_similarity_cos_squared(vectors[0], vectors[1])
 		sim4 = self.get_similarity_normalized_squared(vectors[0], vectors[1])
 		sim5 = self.get_similarity_cos_cubed(vectors[0], vectors[1])
-		return sim1, sim2, sim3, sim4, sim5
+		sim6 = self.get_similarity_cos_power4(vectors[0],vectors[1])
+		return sim1, sim2, sim3, sim4, sim5, sim6
 	
 	
 def build_prefix_array(sim_array):

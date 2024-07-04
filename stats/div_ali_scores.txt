@@ -1,38 +1,75 @@
 
 Auberge                 Prec: 0.588     Rec: 0.718      F1: 0.647       AER: 0.367
+A_cos                   Prec: 0.632     Rec: 0.775      F1: 0.696       AER: 0.319
+A_squared               Prec: 0.671     Rec: 0.821      F1: 0.738       AER: 0.278
 A_cubed                 Prec: 0.689     Rec: 0.841      F1: 0.757       AER: 0.26
 A_4                     Prec: 0.697     Rec: 0.856      F1: 0.768       AER: 0.249
+A_4_seuil_0.1           Prec: 0.741     Rec: 0.807      F1: 0.773       AER: 0.234
+A_4_seuil_0.1_inner     Prec: 0.821     Rec: 0.813      F1: 0.817       AER: 0.182
 
 Barbe                   Prec: 0.532     Rec: 0.685      F1: 0.599       AER: 0.419
+B_cos                   Prec: 0.568     Rec: 0.737      F1: 0.642       AER: 0.379
+B_squared               Prec: 0.613     Rec: 0.798      F1: 0.693       AER: 0.328
 B_cubed                 Prec: 0.624     Rec: 0.816      F1: 0.707       AER: 0.316
 B_4                     Prec: 0.635     Rec: 0.828      F1: 0.719       AER: 0.305
+B_4_seuil_0.1           Prec: 0.69      Rec: 0.763      F1: 0.725       AER: 0.283
+B_4_seuil_0.1_inner     Prec: 0.802     Rec: 0.77       F1: 0.786       AER: 0.211
 
 Chat                    Prec: 0.555     Rec: 0.688      F1: 0.614       AER: 0.399
 Chat_Normalized_Squared Prec: 0.585     Rec: 0.731      F1: 0.65        AER: 0.364
-Chat_Cosinus            Prec: 0.599     Rec: 0.747      F1: 0.665       AER: 0.35
-Chat_Cosinus_Squared    Prec: 0.629     Rec: 0.789      F1: 0.7         AER: 0.317
+Chat_cos                Prec: 0.599     Rec: 0.747      F1: 0.665       AER: 0.35
+Chat_cos_squared        Prec: 0.629     Rec: 0.789      F1: 0.7         AER: 0.317
 Chat_cubed              Prec: 0.65      Rec: 0.817      F1: 0.724       AER: 0.293
 Chat_4                  Prec: 0.666     Rec: 0.834      F1: 0.741       AER: 0.276
+Chat_4_seuil_0.1        Prec: 0.718     Rec: 0.759      F1: 0.738       AER: 0.266
+Chat_4_seuil_0.1_inner  Prec: 0.834     Rec: 0.77       F1: 0.801       AER: 0.194
 
 Derniere                Prec: 0.625     Rec: 0.748      F1: 0.681       AER: 0.336
+D_cos                   Prec: 0.667     Rec: 0.802      F1: 0.728       AER: 0.29
+D_squared               Prec: 0.707     Rec: 0.85       F1: 0.772       AER: 0.247
 D_cubed                 Prec: 0.715     Rec: 0.867      F1: 0.784       AER: 0.236
 D_4                     Prec: 0.722     Rec: 0.884      F1: 0.795       AER: 0.227
+D_4_seuil_0.1           Prec: 0.774     Rec: 0.803      F1: 0.788       AER: 0.215
+D_4_seuil_0.1_inner     Prec: 0.859     Rec: 0.811      F1: 0.834       AER: 0.161
 
 Vision                  Prec: 0.608     Rec: 0.738      F1: 0.667       AER: 0.347
+V_cos                   Prec: 0.639     Rec: 0.78       F1: 0.702       AER: 0.313
+V_squared               Prec: 0.674     Rec: 0.828      F1: 0.743       AER: 0.273
 V_cubed                 Prec: 0.684     Rec: 0.845      F1: 0.756       AER: 0.262
 V_4                     Prec: 0.687     Rec: 0.848      F1: 0.759       AER: 0.258
+V_4_seuil_0.1           Prec: 0.743     Rec: 0.779      F1: 0.761       AER: 0.243
+V_4_seuil_0.1_inner     Prec: 0.833     Rec: 0.792      F1: 0.812       AER: 0.185
+
 auberge:
+normalized_cos:
 FR:  Counter({1: 4580, 2: 531, 3: 8, 4: 2}) ENG:  Counter({1: 4389, 2: 723, 3: 9})
 total leaves found: 5121
+cos4:
+FR:  Counter({1: 4329, 2: 486, 3: 81, 4: 20, 5: 6, 7: 2, 6: 1}) ENG:  Counter({1: 4210, 2: 550, 3: 124, 4: 31, 5: 7, 6: 2, 9: 1})
+
 barbe:
+normalized_cos:
 FR:  Counter({1: 1676, 2: 230, 3: 3}) ENG:  Counter({1: 1604, 2: 288, 3: 15, 4: 1, 5: 1})
 total leaves found: 1909
-chat len distributions:
+cos4:
+FR:  Counter({1: 1578, 2: 203, 3: 42, 4: 5, 5: 3}) ENG:  Counter({1: 1523, 2: 250, 3: 42, 4: 7, 5: 4, 7: 2, 9: 1, 6: 1, 8: 1})
+
+chat:
 FR:  Counter({1: 1563, 2: 146, 3: 2}) ENG:  Counter({1: 1404, 2: 289, 3: 18})
 total leaves found: 1711
+cos4:
+FR:  Counter({1: 1448, 2: 153, 3: 29, 4: 3, 8: 1}) ENG:  Counter({1: 1357, 2: 201, 3: 50, 4: 12, 5: 8, 7: 3, 6: 3})
+
 derniereClasse:
+normalized_cos:
 FR:  Counter({1: 1491, 2: 263, 3: 8, 4: 1}) ENG:  Counter({1: 1594, 2: 166, 3: 3})
 total leaves found: 1763
+cos4:
+FR:  Counter({1: 1426, 2: 193, 3: 51, 4: 13, 6: 3, 5: 2}) ENG:  Counter({1: 1494, 2: 152, 3: 36, 4: 3, 5: 2, 7: 1})
+
 vision:
+normalized_cos:
 FR:  Counter({1: 2167, 2: 359, 3: 9}) ENG:  Counter({1: 2287, 2: 241, 3: 7})
 total leaves found: 2535
+cos4:
+FR:  Counter({1: 2047, 2: 287, 3: 65, 4: 16, 5: 4, 6: 2}) ENG:  Counter({1: 2127, 2: 237, 3: 43, 4: 12, 5: 1, 7: 1})
