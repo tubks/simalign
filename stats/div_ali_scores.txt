@@ -18,11 +18,13 @@ B_4_seuil_0.1_inner     Prec: 0.802     Rec: 0.77       F1: 0.786       AER: 0.2
 Chat                    Prec: 0.555     Rec: 0.688      F1: 0.614       AER: 0.399
 Chat_Normalized_Squared Prec: 0.585     Rec: 0.731      F1: 0.65        AER: 0.364
 Chat_cos                Prec: 0.599     Rec: 0.747      F1: 0.665       AER: 0.35
+Chat_cos_seuil_05       Prec: 0.69      Rec: 0.725      F1: 0.707       AER: 0.296
 Chat_cos_squared        Prec: 0.629     Rec: 0.789      F1: 0.7         AER: 0.317
+Chat_cos_sq_seuil_05    Prec: 0.939     Rec: 0.548      F1: 0.692       AER: 0.294
 Chat_cubed              Prec: 0.65      Rec: 0.817      F1: 0.724       AER: 0.293
 Chat_4                  Prec: 0.666     Rec: 0.834      F1: 0.741       AER: 0.276
-Chat_4_seuil_0.1        Prec: 0.718     Rec: 0.759      F1: 0.738       AER: 0.266
-Chat_4_seuil_0.1_inner  Prec: 0.834     Rec: 0.77       F1: 0.801       AER: 0.194
+Chat_4_seuil_0.1_outer  Prec: 0.718     Rec: 0.759      F1: 0.738       AER: 0.266
+Chat_4_seuil_0.1        Prec: 0.834     Rec: 0.77       F1: 0.801       AER: 0.194
 
 Derniere                Prec: 0.625     Rec: 0.748      F1: 0.681       AER: 0.336
 D_cos                   Prec: 0.667     Rec: 0.802      F1: 0.728       AER: 0.29
@@ -73,3 +75,19 @@ FR:  Counter({1: 2167, 2: 359, 3: 9}) ENG:  Counter({1: 2287, 2: 241, 3: 7})
 total leaves found: 2535
 cos4:
 FR:  Counter({1: 2047, 2: 287, 3: 65, 4: 16, 5: 4, 6: 2}) ENG:  Counter({1: 2127, 2: 237, 3: 43, 4: 12, 5: 1, 7: 1})
+
+cos seuil 0.5
+ nb of ali in generated file:  5434
+ nb of ali in generated file:  1946
+ nb of ali in generated file:  1770
+ nb of ali in generated file:  1782
+ nb of ali in generated file:  2629
+
+cos pow4 seuil 0.1
+ nb of ali in generated file:  4816
+ nb of ali in generated file:  1661
+ nb of ali in generated file:  1505
+ nb of ali in generated file:  1521
+ nb of ali in generated file:  2260
+
+ ref nb of alignments: :/
