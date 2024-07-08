@@ -141,6 +141,24 @@ class SentenceAligner(object):
 		return cosine_similarity(X, Y)**4
 	
 	@staticmethod
+	def get_similarity_cos_pow5(X: np.ndarray, Y: np.ndarray) -> np.ndarray:
+		return cosine_similarity(X, Y)**5
+	@staticmethod
+	def get_similarity_cos_pow6(X: np.ndarray, Y: np.ndarray) -> np.ndarray:
+		return cosine_similarity(X, Y)**6
+	
+	@staticmethod
+	def get_similarity_cos_pow7(X: np.ndarray, Y: np.ndarray) -> np.ndarray:
+		return cosine_similarity(X, Y)**7
+	@staticmethod
+	def get_similarity_cos_pow8(X: np.ndarray, Y: np.ndarray) -> np.ndarray:
+		return cosine_similarity(X, Y)**8
+	
+	@staticmethod
+	def get_similarity_cos_pow10(X: np.ndarray, Y: np.ndarray) -> np.ndarray:
+		return cosine_similarity(X, Y)**10
+	
+	@staticmethod
 	def average_embeds_over_words(bpe_vectors: np.ndarray, word_tokens_pair: List[List[str]]) -> List[np.array]:
 		w2b_map = []
 		cnt = 0
@@ -289,7 +307,7 @@ class SentenceAligner(object):
 		if self.token_type == "word":
 			vectors = self.average_embeds_over_words(vectors, [l1_tokens, l2_tokens])
 
-		sim = self.get_similarity_cos_pow4(vectors[0], vectors[1])
+		sim = self.get_similarity_cos_pow7(vectors[0], vectors[1])
 		return sim
 
 def build_prefix_array(sim_array):
@@ -356,7 +374,7 @@ def cut(X,Y, X_bar, Y_bar):
 def Ncut(X, Y, X_bar, Y_bar):
 	return cut(X,Y,X_bar, Y_bar)/(cut(X,Y,X_bar, Y_bar)+2*W(X,Y))+cut(X_bar, Y_bar, X, Y)/(cut(X_bar, Y_bar, X, Y)+2*W(X_bar, Y_bar))
 
-def align(S,T):
+def align(S,T, inner_seuil):
 	# print("START ",S, T)
 	if len(S)==1 or len(T)==1:
 		# if W(S,T)>0.1: # outer seuil
@@ -364,7 +382,7 @@ def align(S,T):
 		eng_lens.append(len(T))
 		for word_s in S:
 			for word_t in T:
-				if W([word_s],[word_t])>0.1: # inner seuil
+				if W([word_s],[word_t])>inner_seuil: # inner seuil
 					with open(path_to_save, 'a+') as file:
 						# print("END", word_s, word_t)
 						file.write(f'{word_s}-{word_t} ')    # should the cases containing more than 1 word be saved as possible links?
@@ -405,41 +423,42 @@ def align(S,T):
 				X,Y = A, B_bar
 				X_bar, Y_bar = A_bar, B
 			
-	align(X,Y)
-	align(X_bar, Y_bar)
+	align(X,Y, inner_seuil)
+	align(X_bar, Y_bar,inner_seuil)
 
 ali_xml_paths = ["dat/xml_ali/LAuberge_TheInn.ali.xml", "dat/xml_ali/BarbeBleue_BlueBeard.ali.xml","dat/xml_ali/ChatBotte_MasterCat.ali.xml", "dat/xml_ali/Laderniereclasse_Thelastlesson.ali.xml", "dat/xml_ali/LaVision_TheVision.ali.xml"]
-# path = "dat/xml_ali/ChatBotte_MasterCat.ali.xml"
-model = SentenceAligner(model="xlmr",token_type='word')   # simalign class
-for i,path in enumerate(ali_xml_paths):
-	path_to_save = f'{i}_xlmr_sota.txt'
-	# path_to_save = "chat_get_distr.txt"
-	sentence_tuples = extract_sentences(path, is_path=True)
-	# minCuts = []
-	# maxCuts = []
-	fr_lens = []
-	eng_lens = []
-	counter = []
-	for num, tup in enumerate(sentence_tuples):
-		source_sentence, target_sentence = tup
-		# print(source_sentence, target_sentence)
-		print(num)
-		sim = model.get_similarity_matrix(source_sentence, target_sentence)
-		# print(sim)
-		prefix_array = build_prefix_array(sim)
-		source = [i for i in range(len(source_sentence.split()))] # list containing word indices
-		target = [i for i in range(len(target_sentence.split()))]
-		#print(source, target)
-		with open(path_to_save, 'a+') as file:
-			file.write(f'{num}\t')
-		align(source, target)
-		with open(path_to_save, 'a+') as file:
-			file.write('\n')
-	# minCuts.sort()
-	# print(maxCuts, minCuts)
-	# print(len(minCuts), minCuts[:10])
-	# maxCuts.sort(reverse=True)
-	# print(len(maxCuts), maxCuts[:10])
-	counter_fr = Counter(fr_lens)
-	counter_eng = Counter(eng_lens)
-	print("FR: ",counter_fr,"ENG: ", counter_eng, '\n', "nb of ali in generated file: ",len(counter))
+path = "dat/xml_ali/ChatBotte_MasterCat.ali.xml"
+model = SentenceAligner(token_type='word')   # simalign class	# model="xlmr",
+inner_seuil=0.02
+# for i,path in enumerate(ali_xml_paths):
+# path_to_save = f'{i}_xlmr_sota.txt'
+path_to_save = "chat_pow7_002.txt"
+sentence_tuples = extract_sentences(path, is_path=True)
+# minCuts = []
+# maxCuts = []
+fr_lens = []
+eng_lens = []
+counter = []
+for num, tup in enumerate(sentence_tuples):
+	source_sentence, target_sentence = tup
+	# print(source_sentence, target_sentence)
+	print(num)
+	sim = model.get_similarity_matrix(source_sentence, target_sentence)
+	# print(sim)
+	prefix_array = build_prefix_array(sim)
+	source = [i for i in range(len(source_sentence.split()))] # list containing word indices
+	target = [i for i in range(len(target_sentence.split()))]
+	#print(source, target)
+	with open(path_to_save, 'a+') as file:
+		file.write(f'{num}\t')
+	align(source, target, inner_seuil)
+	with open(path_to_save, 'a+') as file:
+		file.write('\n')
+# minCuts.sort()
+# print(maxCuts, minCuts)
+# print(len(minCuts), minCuts[:10])
+# maxCuts.sort(reverse=True)
+# print(len(maxCuts), maxCuts[:10])
+counter_fr = Counter(fr_lens)
+counter_eng = Counter(eng_lens)
+print("FR: ",counter_fr,"ENG: ", counter_eng, '\n', "nb of ali in generated file: ",len(counter))

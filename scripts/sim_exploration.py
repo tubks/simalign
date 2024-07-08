@@ -1,11 +1,15 @@
 from bs4 import BeautifulSoup
 from typing import Dict, List, Tuple, Union
-
+from sklearn.metrics import roc_auc_score
 import numpy as np
 from scipy.stats import entropy
 from scipy.sparse import csr_matrix
 from sklearn.preprocessing import normalize
 from sklearn.metrics.pairwise import cosine_similarity
+from sklearn.neighbors import NearestNeighbors
+
+import numpy as np
+
 try:
 	import networkx as nx
 	from networkx.algorithms.bipartite.matrix import from_biadjacency_matrix
@@ -114,6 +118,25 @@ class SentenceAligner(object):
 		for edge in matching:
 			res_matrix[edge[0], edge[1]] = 1
 		return res_matrix
+	
+
+	@staticmethod
+	def get_mean_similarity_to_neighbs(X: np.ndarray, Y: np.ndarray, k:int) -> np.ndarray:
+	# X = np.array([[-1, -1], [-2, -1], [-3, -2], [1, 1], [2, 1], [3, 2]])
+		nbrs_X = NearestNeighbors(n_neighbors=k, algorithm='brute', metric='cosine').fit(X)
+		nbrs_Y = NearestNeighbors(n_neighbors=k, algorithm='brute', metric='cosine').fit(Y)
+		lens_fr,indices_for_fr_nbrs = nbrs_Y.kneighbors(X)
+		lens_eng,indices_for_eng_nbrs = nbrs_X.kneighbors(Y)
+		cos_sim_fr= np.sum(-1*lens_fr+1, axis=1)
+		cos_sim_eng = np.sum(-1*lens_eng+1,axis=1)
+		return cos_sim_fr/k,cos_sim_eng/k
+	
+	@staticmethod
+	def get_csls(X: np.ndarray, Y: np.ndarray, k: int, mean_cos_fr:np.ndarray, mean_cos_eng:np.ndarray) -> np.ndarray:
+		cos_mat = 2*cosine_similarity(X, Y)
+		mat_minus_fr = cos_mat - mean_cos_fr[:, np.newaxis]
+		mat_result = mat_minus_fr - mean_cos_eng
+		return mat_result
 
 	@staticmethod
 	def get_similarity(X: np.ndarray, Y: np.ndarray) -> np.ndarray:
@@ -136,6 +159,15 @@ class SentenceAligner(object):
 	@staticmethod
 	def get_similarity_cos_pow4(X: np.ndarray, Y: np.ndarray) -> np.ndarray:
 		return cosine_similarity(X, Y)**4
+	
+	@staticmethod
+	def get_similarity_cos_pow5(X: np.ndarray, Y: np.ndarray) -> np.ndarray:
+		return cosine_similarity(X, Y)**5
+	
+	@staticmethod
+	def get_similarity_cos_pow6(X: np.ndarray, Y: np.ndarray) -> np.ndarray:
+		return cosine_similarity(X, Y)**6
+	
 	@staticmethod
 	def average_embeds_over_words(bpe_vectors: np.ndarray, word_tokens_pair: List[List[str]]) -> List[np.array]:
 		w2b_map = []
@@ -285,13 +317,16 @@ class SentenceAligner(object):
 		if self.token_type == "word":
 			vectors = self.average_embeds_over_words(vectors, [l1_tokens, l2_tokens])
 
-		sim1 = self.get_similarity(vectors[0], vectors[1])
-		sim2 = self.get_similarity_cosine(vectors[0], vectors[1])
-		sim3 = self.get_similarity_normalized_squared(vectors[0], vectors[1])
-		sim4 = self.get_similarity_cos_squared(vectors[0], vectors[1])
-		sim5 = self.get_similarity_cos_cubed(vectors[0], vectors[1])
-		sim6 = self.get_similarity_cos_pow4(vectors[0],vectors[1])
-		return sim2
+		# sim1 = self.get_similarity(vectors[0], vectors[1])
+		# sim2 = self.get_similarity_cosine(vectors[0], vectors[1])
+		# sim3 = self.get_similarity_normalized_squared(vectors[0], vectors[1])
+		# sim4 = self.get_similarity_cos_squared(vectors[0], vectors[1])
+		# sim5 = self.get_similarity_cos_cubed(vectors[0], vectors[1])
+		# sim6 = self.get_similarity_cos_pow4(vectors[0],vectors[1])
+		# sim7 = self.get_similarity_cos_pow5(vectors[0],vectors[1])
+		# sim8 = self.get_similarity_cos_pow6(vectors[0],vectors[1])
+		mean_fr, mean_eng = self.get_mean_similarity_to_neighbs(vectors[0],vectors[1], k=2)
+		return vectors[0],vectors[1],mean_fr,mean_eng
 	
 	
 def build_prefix_array(sim_array):
@@ -320,34 +355,36 @@ def compute_score_from_prefix_array(prefix_array,row_start,row_end, col_start,co
 if __name__=="__main__":
 	ali_xml_paths = ["dat/xml_ali/ChatBotte_MasterCat.ali.xml"]
 	# ali_xml_paths = ["dat/xml_ali/LAuberge_TheInn.ali.xml", "dat/xml_ali/BarbeBleue_BlueBeard.ali.xml","dat/xml_ali/ChatBotte_MasterCat.ali.xml","dat/xml_ali/Laderniereclasse_Thelastlesson.ali.xml", "dat/xml_ali/LaVision_TheVision.ali.xml"]
-	model = SentenceAligner(token_type='word')   # simalign class
+	model = SentenceAligner(token_type='word')   # simalign class	# model='xlmr'
 	for path in ali_xml_paths:
 		sentence_tuples = extract_sentences(path, is_path=True)
 		maxs=dict()
 		mins=dict()
 		for num, tup in enumerate(sentence_tuples):
-			source_sentence, target_sentence = tup
+			source_sentence, target_sentence = tup	
 			# print(source_sentence, target_sentence)
-			sims = model.get_similarity_matrix(source_sentence, target_sentence)
+			vec1,vec2,mean_cos_fr, mean_cos_eng = model.get_similarity_matrix(source_sentence, target_sentence)
+			csss = model.get_csls(vec1,vec2, 2,mean_cos_fr, mean_cos_eng)
+			print(csss)
 			# b = build_prefix_array(sim)
-			for i,sim in enumerate(sims):
-				# print(sim, np.max(sim), np.min(sim))
-				if i not in maxs:
-					maxs[i]=[np.max(sim)]
-				else:
-					maxs[i].append(np.max(sim))
-				if i not in mins:
-					mins[i]=[np.min(sim)]
-				else:
-					mins[i].append(np.min(sim))
-				break
-	for min in mins:
-		mins[min].sort()
-		print(mins[min])
-		print(len(mins[min]), mins[min][:10])
-	for max in maxs:	
-		maxs[max].sort(reverse=True)
-		print(maxs[max])
-		print(len(maxs[max]), maxs[max][:10])
+	# 		for i,sim in enumerate(sims):
+	# 			print(sim, np.max(sim), np.min(sim))
+	# 			if i not in maxs:
+	# 				maxs[i]=[np.max(sim)]
+	# 			else:
+	# 				maxs[i].append(np.max(sim))
+	# 			if i not in mins:
+	# 				mins[i]=[np.min(sim)]
+	# 			else:
+	# 				mins[i].append(np.min(sim))
+			break
+	# for min in mins:
+	# 	mins[min].sort()
+	# 	# print(mins[min])
+	# 	print(len(mins[min]), mins[min][:10])
+	# for max in maxs:	
+	# 	maxs[max].sort(reverse=True)
+	# 	# print(maxs[max])
+	# 	print(len(maxs[max]), maxs[max][:10])
 
-	print(mins, maxs)
+	# # print(mins, maxs)

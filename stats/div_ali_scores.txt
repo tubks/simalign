@@ -26,6 +26,24 @@ Chat_4                  Prec: 0.666     Rec: 0.834      F1: 0.741       AER: 0.2
 Chat_4_seuil_0.1_outer  Prec: 0.718     Rec: 0.759      F1: 0.738       AER: 0.266
 Chat_4_seuil_0.1        Prec: 0.834     Rec: 0.77       F1: 0.801       AER: 0.194
 
+Chat_6                  Prec: 0.658     Rec: 0.847      F1: 0.741       AER: 0.278
+Chat_6_seuil_0.03       Prec: 0.829     Rec: 0.787      F1: 0.807       AER: 0.189
+Chat_6_seuil_0.04       Prec: 0.86      Rec: 0.766      F1: 0.81        AER: 0.183
+Chat_6_seuil_0.05       Prec: 0.885     Rec: 0.744      F1: 0.808       AER: 0.181
+Chat_6_seuil_0.07       Prec: 0.913     Rec: 0.704      F1: 0.795       AER: 0.193
+chat_6_seuil_0.1        Prec: 0.937     Rec: 0.637      F1: 0.758       AER: 0.229
+chat_6_seuil_0.15       Prec: 0.947     Rec: 0.523      F1: 0.674       AER: 0.315
+
+Chat_7                  Prec: 0.66      Rec: 0.851      F1: 0.743       AER: 0.275
+Chat_7_0.01             Prec: 0.773     Rec: 0.82       F1: 0.796       AER: 0.208
+Chat_7_0.02             Prec: 0.843     Rec: 0.783      F1: 0.812       AER: 0.184
+
+Chat_8                  Prec: 0.663     Rec: 0.846      F1: 0.743       AER: 0.275
+Chat_8_seuil_0.1        Prec: 0.898     Rec: 0.718      F1: 0.798       AER: 0.191
+Chat_8_seuil_0.05       Prec: 0.808     Rec: 0.795      F1: 0.801       AER: 0.197
+Chat_8_0.01             Prec: 0.839     Rec: 0.789      F1: 0.813       AER: 0.183
+Chat_10                 Prec: 0.657     Rec: 0.845      F1: 0.739       AER: 0.28
+
 Derniere                Prec: 0.625     Rec: 0.748      F1: 0.681       AER: 0.336
 D_cos                   Prec: 0.667     Rec: 0.802      F1: 0.728       AER: 0.29
 D_squared               Prec: 0.707     Rec: 0.85       F1: 0.772       AER: 0.247
@@ -48,7 +66,9 @@ FR:  Counter({1: 4580, 2: 531, 3: 8, 4: 2}) ENG:  Counter({1: 4389, 2: 723, 3: 9
 total leaves found: 5121
 cos4:
 FR:  Counter({1: 4329, 2: 486, 3: 81, 4: 20, 5: 6, 7: 2, 6: 1}) ENG:  Counter({1: 4210, 2: 550, 3: 124, 4: 31, 5: 7, 6: 2, 9: 1})
-
+xlrm cos4:
+FR:  Counter({1: 4323, 2: 574, 3: 54, 4: 9, 5: 1}) ENG:  Counter({1: 4164, 2: 703, 3: 86, 4: 6, 5: 2}) 
+ nb of ali in generated file:  6575
 barbe:
 normalized_cos:
 FR:  Counter({1: 1676, 2: 230, 3: 3}) ENG:  Counter({1: 1604, 2: 288, 3: 15, 4: 1, 5: 1})
