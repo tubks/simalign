@@ -7,6 +7,7 @@ from scipy.stats import entropy
 from scipy.sparse import csr_matrix
 from sklearn.preprocessing import normalize
 from sklearn.metrics.pairwise import cosine_similarity
+from sklearn.neighbors import NearestNeighbors
 try:
 	import networkx as nx
 	from networkx.algorithms.bipartite.matrix import from_biadjacency_matrix
@@ -115,6 +116,24 @@ class SentenceAligner(object):
 		for edge in matching:
 			res_matrix[edge[0], edge[1]] = 1
 		return res_matrix
+	
+	@staticmethod
+	def get_mean_similarity_to_neighbs(X: np.ndarray, Y: np.ndarray, k:int) -> np.ndarray:
+	# X = np.array([[-1, -1], [-2, -1], [-3, -2], [1, 1], [2, 1], [3, 2]])
+		nbrs_X = NearestNeighbors(n_neighbors=k, algorithm='brute', metric='cosine').fit(X)
+		nbrs_Y = NearestNeighbors(n_neighbors=k, algorithm='brute', metric='cosine').fit(Y)
+		lens_fr,indices_for_fr_nbrs = nbrs_Y.kneighbors(X)
+		lens_eng,indices_for_eng_nbrs = nbrs_X.kneighbors(Y)
+		cos_sim_fr= np.sum(-1*lens_fr+1, axis=1)
+		cos_sim_eng = np.sum(-1*lens_eng+1,axis=1)
+		return cos_sim_fr/k,cos_sim_eng/k
+	
+	@staticmethod
+	def get_csls(X: np.ndarray, Y: np.ndarray, k: int, mean_cos_fr:np.ndarray, mean_cos_eng:np.ndarray) -> np.ndarray:
+		cos_mat = 2*cosine_similarity(X, Y)
+		mat_minus_fr = cos_mat - mean_cos_fr[:, np.newaxis]
+		mat_result = mat_minus_fr - mean_cos_eng
+		return mat_result
 
 	@staticmethod
 	def get_similarity(X: np.ndarray, Y: np.ndarray) -> np.ndarray:
@@ -283,6 +302,29 @@ class SentenceAligner(object):
 		for ext in aligns:
 			aligns[ext] = sorted(aligns[ext])
 		return aligns
+	def get_embeddings(self, src_sent, trg_sent):	# get_similarity_matrix
+		if isinstance(src_sent, str):
+			src_sent = src_sent.split()
+		if isinstance(trg_sent, str):
+			trg_sent = trg_sent.split()
+		l1_tokens = [self.embed_loader.tokenizer.tokenize(word) for word in src_sent]
+		l2_tokens = [self.embed_loader.tokenizer.tokenize(word) for word in trg_sent]
+		bpe_lists = [[bpe for w in sent for bpe in w] for sent in [l1_tokens, l2_tokens]]
+
+		if self.token_type == "bpe":
+			l1_b2w_map = []
+			for i, wlist in enumerate(l1_tokens):
+				l1_b2w_map += [i for x in wlist]
+			l2_b2w_map = []
+			for i, wlist in enumerate(l2_tokens):
+				l2_b2w_map += [i for x in wlist]
+
+		vectors = self.embed_loader.get_embed_list([src_sent, trg_sent]).cpu().detach().numpy()
+		vectors = [vectors[i, :len(bpe_lists[i])] for i in [0, 1]]
+
+		if self.token_type == "word":
+			vectors = self.average_embeds_over_words(vectors, [l1_tokens, l2_tokens])
+		return vectors[0],vectors[1]
 
 	def get_similarity_matrix(self, src_sent, trg_sent):
 		if isinstance(src_sent, str):
@@ -399,27 +441,14 @@ def align(S,T, inner_seuil):
 			B = T[:j]
 			A_bar = S[i:]
 			B_bar = T[j:]
-			# print(A,B,A_bar,B_bar)
-			# print(Ncut(A,B, A_bar, B_bar))
-			# print(Ncut(A, B_bar, A_bar, B))
 			newNcut = Ncut(A,B, A_bar, B_bar)
-			# if newNcut>maxNcut:
-				# maxNcut=newNcut
-				# maxCuts.append(maxNcut)
 			if newNcut<minNcut:
 				minNcut = newNcut
-				# print("minNcut update", minNcut)
-				# minCuts.append(minNcut)
 				X,Y = A, B
 				X_bar, Y_bar = A_bar, B_bar
 			newNcut = Ncut(A, B_bar, A_bar, B)
-			# if newNcut>maxNcut:
-			# 	maxNcut=newNcut
-			# 	maxCuts.append(maxNcut)
 			if newNcut<minNcut:
 				minNcut = newNcut
-				# print("minNcut update", minNcut)
-				# minCuts.append(minNcut)
 				X,Y = A, B_bar
 				X_bar, Y_bar = A_bar, B
 			
@@ -429,10 +458,10 @@ def align(S,T, inner_seuil):
 ali_xml_paths = ["dat/xml_ali/LAuberge_TheInn.ali.xml", "dat/xml_ali/BarbeBleue_BlueBeard.ali.xml","dat/xml_ali/ChatBotte_MasterCat.ali.xml", "dat/xml_ali/Laderniereclasse_Thelastlesson.ali.xml", "dat/xml_ali/LaVision_TheVision.ali.xml"]
 path = "dat/xml_ali/ChatBotte_MasterCat.ali.xml"
 model = SentenceAligner(token_type='word')   # simalign class	# model="xlmr",
-inner_seuil=0.02
+inner_seuil=-2
 # for i,path in enumerate(ali_xml_paths):
 # path_to_save = f'{i}_xlmr_sota.txt'
-path_to_save = "chat_pow7_002.txt"
+path_to_save = "chat_csls_inv.txt"
 sentence_tuples = extract_sentences(path, is_path=True)
 # minCuts = []
 # maxCuts = []
@@ -443,8 +472,11 @@ for num, tup in enumerate(sentence_tuples):
 	source_sentence, target_sentence = tup
 	# print(source_sentence, target_sentence)
 	print(num)
-	sim = model.get_similarity_matrix(source_sentence, target_sentence)
-	# print(sim)
+	# sim = model.get_similarity_matrix(source_sentence, target_sentence)
+	vec1,vec2 = model.get_embeddings(source_sentence, target_sentence)
+	mean_cos_fr, mean_cos_eng = model.get_mean_similarity_to_neighbs(vec1,vec2, k=2)
+	sim = model.get_csls(vec1,vec2, 2,mean_cos_fr, mean_cos_eng)
+	print(sim)
 	prefix_array = build_prefix_array(sim)
 	source = [i for i in range(len(source_sentence.split()))] # list containing word indices
 	target = [i for i in range(len(target_sentence.split()))]
@@ -454,11 +486,6 @@ for num, tup in enumerate(sentence_tuples):
 	align(source, target, inner_seuil)
 	with open(path_to_save, 'a+') as file:
 		file.write('\n')
-# minCuts.sort()
-# print(maxCuts, minCuts)
-# print(len(minCuts), minCuts[:10])
-# maxCuts.sort(reverse=True)
-# print(len(maxCuts), maxCuts[:10])
 counter_fr = Counter(fr_lens)
 counter_eng = Counter(eng_lens)
 print("FR: ",counter_fr,"ENG: ", counter_eng, '\n', "nb of ali in generated file: ",len(counter))
