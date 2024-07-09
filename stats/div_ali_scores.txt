@@ -44,6 +44,29 @@ Chat_8_seuil_0.05       Prec: 0.808     Rec: 0.795      F1: 0.801       AER: 0.1
 Chat_8_0.01             Prec: 0.839     Rec: 0.789      F1: 0.813       AER: 0.183
 Chat_10                 Prec: 0.657     Rec: 0.845      F1: 0.739       AER: 0.28
 
+chat_csls               Prec: 0.603     Rec: 0.753      F1: 0.67        AER: 0.345
+c_csls_6                Prec: 0.665     Rec: 0.841      F1: 0.743       AER: 0.275
+c_csls_6_005            Prec: 0.753     Rec: 0.838      F1: 0.793       AER: 0.215
+c_csls_6_01             Prec: 0.849     Rec: 0.824      F1: 0.836       AER: 0.162
+c_csls_7                Prec: 0.66      Rec: 0.837      F1: 0.738       AER: 0.28
+c_csls_7_k3             Prec: 0.67      Rec: 0.845      F1: 0.747       AER: 0.271
+c_csls_7_k4             Prec: 0.674     Rec: 0.851      F1: 0.752       AER: 0.266
+c_csls_7_003_k4         Prec: 0.878     Rec: 0.813      F1: 0.844       AER: 0.15
+c_csls_7_004_k4         Prec: 0.91      Rec: 0.795      F1: 0.849       AER: 0.143
+c_csls_7_005_k4         Prec: 0.927     Rec: 0.772      F1: 0.842       AER: 0.148
+
+c_csls_7_01             Prec: 0.897     Rec: 0.794      F1: 0.842       AER: 0.15
+c_csls_7_009_k4         Prec: 0.839     Rec: 0.831      F1: 0.835       AER: 0.164
+c_csls_7_01_k4          Prec: 0.852     Rec: 0.826      F1: 0.839       AER: 0.159
+c_csls_7_012_k4         Prec: 0.881     Rec: 0.81       F1: 0.844       AER: 0.15
+
+c_xlmr_csls_6_01        Prec: 0.902     Rec: 0.751      F1: 0.82        AER: 0.17
+c_xlmr_csls_7           Prec: 0.634     Rec: 0.812      F1: 0.712       AER: 0.306
+c_xlmr_csls_7_005_k4    Prec: 0.756     Rec: 0.812      F1: 0.783       AER: 0.222
+c_xlmr_csls_7_01        Prec: 0.906     Rec: 0.777      F1: 0.837       AER: 0.154
+c_xlmr_csls_7_01_k4     Prec: 0.86      Rec: 0.792      F1: 0.825       AER: 0.17
+
+
 Derniere                Prec: 0.625     Rec: 0.748      F1: 0.681       AER: 0.336
 D_cos                   Prec: 0.667     Rec: 0.802      F1: 0.728       AER: 0.29
 D_squared               Prec: 0.707     Rec: 0.85       F1: 0.772       AER: 0.247

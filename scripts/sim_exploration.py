@@ -136,7 +136,8 @@ class SentenceAligner(object):
 		cos_mat = 2*cosine_similarity(X, Y)
 		mat_minus_fr = cos_mat - mean_cos_fr[:, np.newaxis]
 		mat_result = mat_minus_fr - mean_cos_eng
-		return mat_result
+		normalized_chat =(mat_result+1.1348)/(0.39735+1.1347)
+		return normalized_chat**2
 
 	@staticmethod
 	def get_similarity(X: np.ndarray, Y: np.ndarray) -> np.ndarray:
@@ -294,7 +295,7 @@ class SentenceAligner(object):
 			aligns[ext] = sorted(aligns[ext])
 		return aligns
 
-	def get_similarity_matrix(self, src_sent, trg_sent):
+	def get_embeddings(self, src_sent, trg_sent):	# get_similarity_matrix before
 		if isinstance(src_sent, str):
 			src_sent = src_sent.split()
 		if isinstance(trg_sent, str):
@@ -325,8 +326,7 @@ class SentenceAligner(object):
 		# sim6 = self.get_similarity_cos_pow4(vectors[0],vectors[1])
 		# sim7 = self.get_similarity_cos_pow5(vectors[0],vectors[1])
 		# sim8 = self.get_similarity_cos_pow6(vectors[0],vectors[1])
-		mean_fr, mean_eng = self.get_mean_similarity_to_neighbs(vectors[0],vectors[1], k=2)
-		return vectors[0],vectors[1],mean_fr,mean_eng
+		return vectors[0],vectors[1]
 	
 	
 def build_prefix_array(sim_array):
@@ -358,16 +358,20 @@ if __name__=="__main__":
 	model = SentenceAligner(token_type='word')   # simalign class	# model='xlmr'
 	for path in ali_xml_paths:
 		sentence_tuples = extract_sentences(path, is_path=True)
-		maxs=dict()
-		mins=dict()
+		maxs=[]
+		mins=[]
 		for num, tup in enumerate(sentence_tuples):
 			source_sentence, target_sentence = tup	
 			# print(source_sentence, target_sentence)
-			vec1,vec2,mean_cos_fr, mean_cos_eng = model.get_similarity_matrix(source_sentence, target_sentence)
-			csss = model.get_csls(vec1,vec2, 2,mean_cos_fr, mean_cos_eng)
-			print(csss)
+			# vec1,vec2 = model.get_similarity_matrix(source_sentence, target_sentence)
+			vec1,vec2 = model.get_embeddings(source_sentence, target_sentence)
+			mean_cos_fr, mean_cos_eng = model.get_mean_similarity_to_neighbs(vec1,vec2, k=2)
+			sim = model.get_csls(vec1,vec2, 2,mean_cos_fr, mean_cos_eng)
+			print(sim)
+			maxs.append(np.max(sim))
+			mins.append(np.min(sim))
 			# b = build_prefix_array(sim)
-	# 		for i,sim in enumerate(sims):
+	# 		for i,sim in sim:
 	# 			print(sim, np.max(sim), np.min(sim))
 	# 			if i not in maxs:
 	# 				maxs[i]=[np.max(sim)]
@@ -377,7 +381,7 @@ if __name__=="__main__":
 	# 				mins[i]=[np.min(sim)]
 	# 			else:
 	# 				mins[i].append(np.min(sim))
-			break
+			# break
 	# for min in mins:
 	# 	mins[min].sort()
 	# 	# print(mins[min])
@@ -387,4 +391,4 @@ if __name__=="__main__":
 	# 	# print(maxs[max])
 	# 	print(len(maxs[max]), maxs[max][:10])
 
-	# # print(mins, maxs)
+print(min(mins), max(maxs))

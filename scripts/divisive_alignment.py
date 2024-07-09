@@ -133,8 +133,9 @@ class SentenceAligner(object):
 		cos_mat = 2*cosine_similarity(X, Y)
 		mat_minus_fr = cos_mat - mean_cos_fr[:, np.newaxis]
 		mat_result = mat_minus_fr - mean_cos_eng
-		return mat_result
-
+		# normalized_chat =(mat_result+0.656)/(0.203+0.656) # xlrm
+		normalized_chat = (mat_result+0.9380217)/(0.6029104+0.9380217)	# bert
+		return normalized_chat**7
 	@staticmethod
 	def get_similarity(X: np.ndarray, Y: np.ndarray) -> np.ndarray:
 		return (cosine_similarity(X, Y) + 1.0) / 2.0
@@ -456,15 +457,15 @@ def align(S,T, inner_seuil):
 	align(X_bar, Y_bar,inner_seuil)
 
 ali_xml_paths = ["dat/xml_ali/LAuberge_TheInn.ali.xml", "dat/xml_ali/BarbeBleue_BlueBeard.ali.xml","dat/xml_ali/ChatBotte_MasterCat.ali.xml", "dat/xml_ali/Laderniereclasse_Thelastlesson.ali.xml", "dat/xml_ali/LaVision_TheVision.ali.xml"]
-path = "dat/xml_ali/ChatBotte_MasterCat.ali.xml"
+path = "dat/xml_ali/Laderniereclasse_Thelastlesson.ali.xml"
 model = SentenceAligner(token_type='word')   # simalign class	# model="xlmr",
-inner_seuil=-2
+inner_seuil=0.04
 # for i,path in enumerate(ali_xml_paths):
 # path_to_save = f'{i}_xlmr_sota.txt'
-path_to_save = "chat_csls_inv.txt"
+path_to_save = "d_csls_7_004_k3.txt"
 sentence_tuples = extract_sentences(path, is_path=True)
-# minCuts = []
-# maxCuts = []
+mins = []
+maxs = []
 fr_lens = []
 eng_lens = []
 counter = []
@@ -474,9 +475,11 @@ for num, tup in enumerate(sentence_tuples):
 	print(num)
 	# sim = model.get_similarity_matrix(source_sentence, target_sentence)
 	vec1,vec2 = model.get_embeddings(source_sentence, target_sentence)
-	mean_cos_fr, mean_cos_eng = model.get_mean_similarity_to_neighbs(vec1,vec2, k=2)
-	sim = model.get_csls(vec1,vec2, 2,mean_cos_fr, mean_cos_eng)
-	print(sim)
+	mean_cos_fr, mean_cos_eng = model.get_mean_similarity_to_neighbs(vec1,vec2, k=3)
+	sim = model.get_csls(vec1,vec2, 3,mean_cos_fr, mean_cos_eng)
+	# print(sim)
+	maxs.append(np.max(sim))
+	mins.append(np.min(sim))
 	prefix_array = build_prefix_array(sim)
 	source = [i for i in range(len(source_sentence.split()))] # list containing word indices
 	target = [i for i in range(len(target_sentence.split()))]
@@ -489,3 +492,4 @@ for num, tup in enumerate(sentence_tuples):
 counter_fr = Counter(fr_lens)
 counter_eng = Counter(eng_lens)
 print("FR: ",counter_fr,"ENG: ", counter_eng, '\n', "nb of ali in generated file: ",len(counter))
+print(min(mins), max(maxs))
