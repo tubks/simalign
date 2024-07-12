@@ -134,8 +134,8 @@ class SentenceAligner(object):
 		mat_minus_fr = cos_mat - mean_cos_fr[:, np.newaxis]
 		mat_result = mat_minus_fr - mean_cos_eng
 		# normalized_chat =(mat_result+0.656)/(0.203+0.656) # xlrm
-		normalized_chat = (mat_result+0.9380217)/(0.6029104+0.9380217)	# bert
-		return normalized_chat**7
+		normalized_chat = (mat_result+0.9380217)/(0.6029104+0.9380217)	# bert min -0.9380217 max 0.6029104
+		return normalized_chat**6
 	@staticmethod
 	def get_similarity(X: np.ndarray, Y: np.ndarray) -> np.ndarray:
 		return (cosine_similarity(X, Y) + 1.0) / 2.0
@@ -367,36 +367,16 @@ def build_prefix_array(sim_array):
 	return prefix_array
 
 
-def compute_score_from_prefix_array(row_start,row_end, col_start,col_end):
+def compute_score_from_prefix_array(row_start,row_end, col_start,col_end,prefix_array):
 	if row_start==0 and col_start==0:
-		# print("PREFIX INDICES: ",row_start,row_end, col_start, col_end)
-		# print("PREFIX SUMS: ",prefix_array[row_end-1,col_end-1])
-		# prefix_slice = prefix_array[row_start:row_end-1, col_start:col_end-1]
-		# print("PREFIX SLICE: ", prefix_slice)
-		# print("PREFIX SLICE SHAPE: ", prefix_slice.shape)
 		return prefix_array[row_end-1,col_end-1]
 	if row_start==0 and col_start!=0:
-		# print("PREFIX INDICES: ",row_start,row_end, col_start, col_end)
-		# print("PREFIX SUMS: ", prefix_array[row_end-1,col_end-1]-prefix_array[row_end-1,col_start-1])
-		# prefix_slice = prefix_array[row_start-1:row_end-1, col_start-1:col_end-1]
-		# print("PREFIX SLICE: ", prefix_slice)
-		# print("PREFIX SLICE SHAPE: ", prefix_slice.shape)
 		return prefix_array[row_end-1,col_end-1]-prefix_array[row_end-1,col_start-1]
 	if row_start!=0 and col_start==0:
-		# print("PREFIX INDICES: ",row_start,row_end, col_start, col_end)
-		# print("PREFIX SUMS: ",prefix_array[row_end-1,col_end-1]-prefix_array[row_start-1,col_end-1])
-		# prefix_slice = prefix_array[row_start-1:row_end-1, col_start:col_end-1]
-		# print("PREFIX SLICE: ", prefix_slice)
-		# print("PREFIX SLICE SHAPE: ", prefix_slice.shape)
 		return prefix_array[row_end-1,col_end-1]-prefix_array[row_start-1,col_end-1]
 	else:
-		# print("PREFIX INDICES: ",row_start,row_end, col_start, col_end)
-		# print("PREFIX SUMS: ",prefix_array[row_end-1, col_end-1], prefix_array[row_start-1,col_start-1], prefix_array[row_end-1,col_end-1]-prefix_array[row_end-1,col_start-1]-prefix_array[row_start-1,col_end-1]+prefix_array[row_start-1,col_start-1])
-		# prefix_slice = prefix_array[row_start-1:row_end-1, col_start-1:col_end-1]
-		# print("PREFIX SLICE: ", prefix_slice)
-		# print("PREFIX SLICE SHAPE: ", prefix_slice.shape)
 		return prefix_array[row_end-1,col_end-1]-prefix_array[row_end-1,col_start-1]-prefix_array[row_start-1,col_end-1]+prefix_array[row_start-1,col_start-1]
-def W(X,Y): # TODO: use prefix sums
+def W(X,Y,sim,prefix_array):
 	# print(f'W: {X},{Y}')
 	# print("matrix slice:", X[0],X[-1],Y[0],Y[-1])
 	if len(X)==1 and len(Y)==1:
@@ -406,30 +386,33 @@ def W(X,Y): # TODO: use prefix sums
 	elif len(X)!=1 and len(Y)==1:
 		return np.sum(sim[X[0]:X[-1],Y[0]])
 	else:
-		# print("SIM SUM: ",np.sum(sim[X[0]:X[-1],Y[0]:Y[-1]]))
-		# print("SIM SLICE SHAPE: ", sim[X[0]:X[-1],Y[0]:Y[-1]].shape)
-		return compute_score_from_prefix_array(X[0],X[-1],Y[0],Y[-1])
-		# return np.sum(sim[X[0]:X[-1],Y[0]:Y[-1]])
-def cut(X,Y, X_bar, Y_bar):
-	# print("cut:",X,Y,X_bar,Y_bar)
-	return W(X, Y_bar)+W(X_bar, Y)
+		return compute_score_from_prefix_array(X[0],X[-1],Y[0],Y[-1],prefix_array)
+	
+def cut(X,Y, X_bar, Y_bar,sim,prefix_array):
+	return W(X, Y_bar,sim,prefix_array)+W(X_bar, Y,sim,prefix_array)
 
-def Ncut(X, Y, X_bar, Y_bar):
-	return cut(X,Y,X_bar, Y_bar)/(cut(X,Y,X_bar, Y_bar)+2*W(X,Y))+cut(X_bar, Y_bar, X, Y)/(cut(X_bar, Y_bar, X, Y)+2*W(X_bar, Y_bar))
+def Ncut(X, Y, X_bar, Y_bar,sim,prefix_array):
+	return cut(X,Y,X_bar, Y_bar,sim,prefix_array)/(cut(X,Y,X_bar, Y_bar,sim,prefix_array)+2*W(X,Y,sim,prefix_array))+cut(X_bar, Y_bar, X, Y,sim,prefix_array)/(cut(X_bar, Y_bar, X, Y,sim,prefix_array)+2*W(X_bar, Y_bar,sim,prefix_array))
 
-def align(S,T, inner_seuil):
+def align(S,T, inner_seuil,sim,prefix_array,path_to_save):
 	# print("START ",S, T)
+	# with open(path_to_save, 'a+') as file:
+		# print("END", word_s, word_t)
+		# file.write(f'{S[0]},{S[-1]}-{T[0]},{T[-1]} ')	# spanaoh
 	if len(S)==1 or len(T)==1:
 		# if W(S,T)>0.1: # outer seuil
-		fr_lens.append(len(S))
-		eng_lens.append(len(T))
+		# with open(path_to_save, 'a+') as file:
+			# print("END", word_s, word_t)
+			# file.write(f'{S[0]},{S[-1]}-{T[0]},{T[-1]} ')
+		# fr_lens.append(len(S))
+		# eng_lens.append(len(T))
 		for word_s in S:
 			for word_t in T:
-				if W([word_s],[word_t])>inner_seuil: # inner seuil
+				if W([word_s],[word_t], sim,prefix_array)>inner_seuil: # inner seuil
 					with open(path_to_save, 'a+') as file:
 						# print("END", word_s, word_t)
 						file.write(f'{word_s}-{word_t} ')    # should the cases containing more than 1 word be saved as possible links?
-					counter.append(1)
+					# counter.append(1)
 		return S,T # terminate the procedure
 	
 	minNcut = 2
@@ -442,54 +425,56 @@ def align(S,T, inner_seuil):
 			B = T[:j]
 			A_bar = S[i:]
 			B_bar = T[j:]
-			newNcut = Ncut(A,B, A_bar, B_bar)
+			newNcut = Ncut(A,B, A_bar, B_bar,sim,prefix_array)
 			if newNcut<minNcut:
 				minNcut = newNcut
 				X,Y = A, B
 				X_bar, Y_bar = A_bar, B_bar
-			newNcut = Ncut(A, B_bar, A_bar, B)
+			newNcut = Ncut(A, B_bar, A_bar, B,sim,prefix_array)
 			if newNcut<minNcut:
 				minNcut = newNcut
 				X,Y = A, B_bar
-				X_bar, Y_bar = A_bar, B
-			
-	align(X,Y, inner_seuil)
-	align(X_bar, Y_bar,inner_seuil)
+				X_bar, Y_bar = A_bar, B		
+	align(X,Y, inner_seuil,sim,prefix_array,path_to_save)
+	align(X_bar, Y_bar,inner_seuil,sim,prefix_array,path_to_save)
 
-ali_xml_paths = ["dat/xml_ali/LAuberge_TheInn.ali.xml", "dat/xml_ali/BarbeBleue_BlueBeard.ali.xml","dat/xml_ali/ChatBotte_MasterCat.ali.xml", "dat/xml_ali/Laderniereclasse_Thelastlesson.ali.xml", "dat/xml_ali/LaVision_TheVision.ali.xml"]
-path = "dat/xml_ali/Laderniereclasse_Thelastlesson.ali.xml"
-model = SentenceAligner(token_type='word')   # simalign class	# model="xlmr",
-inner_seuil=0.04
-# for i,path in enumerate(ali_xml_paths):
-# path_to_save = f'{i}_xlmr_sota.txt'
-path_to_save = "d_csls_7_004_k3.txt"
-sentence_tuples = extract_sentences(path, is_path=True)
-mins = []
-maxs = []
-fr_lens = []
-eng_lens = []
-counter = []
-for num, tup in enumerate(sentence_tuples):
-	source_sentence, target_sentence = tup
-	# print(source_sentence, target_sentence)
-	print(num)
-	# sim = model.get_similarity_matrix(source_sentence, target_sentence)
-	vec1,vec2 = model.get_embeddings(source_sentence, target_sentence)
-	mean_cos_fr, mean_cos_eng = model.get_mean_similarity_to_neighbs(vec1,vec2, k=3)
-	sim = model.get_csls(vec1,vec2, 3,mean_cos_fr, mean_cos_eng)
-	# print(sim)
-	maxs.append(np.max(sim))
-	mins.append(np.min(sim))
-	prefix_array = build_prefix_array(sim)
-	source = [i for i in range(len(source_sentence.split()))] # list containing word indices
-	target = [i for i in range(len(target_sentence.split()))]
-	#print(source, target)
-	with open(path_to_save, 'a+') as file:
-		file.write(f'{num}\t')
-	align(source, target, inner_seuil)
-	with open(path_to_save, 'a+') as file:
-		file.write('\n')
-counter_fr = Counter(fr_lens)
-counter_eng = Counter(eng_lens)
-print("FR: ",counter_fr,"ENG: ", counter_eng, '\n', "nb of ali in generated file: ",len(counter))
-print(min(mins), max(maxs))
+
+if __name__=='__main__':
+	ali_xml_paths = ["dat/xml_ali/LAuberge_TheInn.ali.xml", "dat/xml_ali/BarbeBleue_BlueBeard.ali.xml","dat/xml_ali/ChatBotte_MasterCat.ali.xml", "dat/xml_ali/Laderniereclasse_Thelastlesson.ali.xml", "dat/xml_ali/LaVision_TheVision.ali.xml"]
+	path = "dat/xml_ali/ChatBotte_MasterCat.ali.xml"
+	model = SentenceAligner(token_type='word')   # simalign class	# model="xlmr",
+	inner_seuil=0.014
+	k=4
+	# for i,path in enumerate(ali_xml_paths):
+	# path_to_save = f'{i}_xlmr_sota.txt'
+	path_to_save = "chat_csls_forminmax.txt"
+	sentence_tuples = extract_sentences(path, is_path=True)
+	mins = []
+	maxs = []
+	fr_lens = []
+	eng_lens = []
+	counter = []
+	for num, tup in enumerate(sentence_tuples):
+		source_sentence, target_sentence = tup
+		# print(source_sentence, target_sentence)
+		print(num)
+		# sim = model.get_similarity_matrix(source_sentence, target_sentence)
+		vec1,vec2 = model.get_embeddings(source_sentence, target_sentence)
+		mean_cos_fr, mean_cos_eng = model.get_mean_similarity_to_neighbs(vec1,vec2, k=k)
+		sim = model.get_csls(vec1,vec2, k,mean_cos_fr, mean_cos_eng)
+		# print(sim)
+		maxs.append(np.max(sim))
+		mins.append(np.min(sim))
+		prefix_array = build_prefix_array(sim)
+		source = [i for i in range(len(source_sentence.split()))] # list containing word indices
+		target = [i for i in range(len(target_sentence.split()))]
+		#print(source, target)
+		with open(path_to_save, 'a+') as file:
+			file.write(f'{num}\t')
+		align(source, target, inner_seuil,sim,prefix_array)
+		with open(path_to_save, 'a+') as file:
+			file.write('\n')
+	counter_fr = Counter(fr_lens)
+	counter_eng = Counter(eng_lens)
+	print("FR: ",counter_fr,"ENG: ", counter_eng, '\n', "nb of ali in generated file: ",len(counter))
+	print(min(mins), max(maxs))

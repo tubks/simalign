@@ -46,7 +46,14 @@ Chat_10                 Prec: 0.657     Rec: 0.845      F1: 0.739       AER: 0.2
 
 chat_csls               Prec: 0.603     Rec: 0.753      F1: 0.67        AER: 0.345
 c_csls_6                Prec: 0.665     Rec: 0.841      F1: 0.743       AER: 0.275
+c_csls_6_norm2          Prec: 0.662     Rec: 0.838      F1: 0.74        AER: 0.278
+
+c_csls_6_001_k4_n2      Prec: 0.836     Rec: 0.826      F1: 0.831       AER: 0.168
+c_csls_6_002_k4_n2      Prec: 0.914     Rec: 0.789      F1: 0.847       AER: 0.145
+c_csls_6_0025_k4_n2     Prec: 0.935     Rec: 0.755      F1: 0.835       AER: 0.153
 c_csls_6_005            Prec: 0.753     Rec: 0.838      F1: 0.793       AER: 0.215
+c_csls_6_006            Prec: 0.919     Rec: 0.779      F1: 0.843       AER: 0.147
+c_csls_6_006_k4_n2      Prec: 0.97      Rec: 0.473      F1: 0.636       AER: 0.353
 c_csls_6_01             Prec: 0.849     Rec: 0.824      F1: 0.836       AER: 0.162
 c_csls_7                Prec: 0.66      Rec: 0.837      F1: 0.738       AER: 0.28
 c_csls_7_k3             Prec: 0.67      Rec: 0.845      F1: 0.747       AER: 0.271

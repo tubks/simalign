@@ -1,0 +1,56 @@
+seuil: 0.0	    Prec: 0.673	Rec: 0.848	F1: 0.75	AER: 0.267
+seuil: 0.1	    Prec: 0.982	Rec: 0.176	F1: 0.299	AER: 0.697
+seuil: 0.2	    Prec: 1.0	Rec: 0.015	F1: 0.03	AER: 0.97
+seuil: 0.01	    Prec: 0.82	Rec: 0.837	F1: 0.828	AER: 0.173
+seuil: 0.02	    Prec: 0.914	Rec: 0.789	F1: 0.847	AER: 0.145
+seuil: 0.03	    Prec: 0.952	Rec: 0.73	F1: 0.826	AER: 0.161
+seuil: 0.04	    Prec: 0.96	Rec: 0.649	F1: 0.774	AER: 0.214
+seuil: 0.05	    Prec: 0.963	Rec: 0.558	F1: 0.707	AER: 0.282
+seuil: 0.001	Prec: 0.678	Rec: 0.848	F1: 0.754	AER: 0.263
+seuil: 0.002	Prec: 0.688	Rec: 0.848	F1: 0.76	AER: 0.257
+seuil: 0.003	Prec: 0.705	Rec: 0.848	F1: 0.77	AER: 0.245
+seuil: 0.004	Prec: 0.72	Rec: 0.848	F1: 0.779	AER: 0.234
+seuil: 0.005	Prec: 0.736	Rec: 0.847	F1: 0.788	AER: 0.223
+seuil: 0.006	Prec: 0.752	Rec: 0.847	F1: 0.797	AER: 0.212
+seuil: 0.007	Prec: 0.768	Rec: 0.845	F1: 0.805	AER: 0.203
+seuil: 0.008	Prec: 0.781	Rec: 0.841	F1: 0.81	AER: 0.196
+seuil: 0.009	Prec: 0.798	Rec: 0.841	F1: 0.819	AER: 0.185
+seuil: 0.01	    Prec: 0.82	Rec: 0.837	F1: 0.828	AER: 0.173
+seuil: 0.011	Prec: 0.83	Rec: 0.834	F1: 0.832	AER: 0.168
+seuil: 0.012	Prec: 0.842	Rec: 0.83	F1: 0.836	AER: 0.163
+seuil: 0.013	Prec: 0.852	Rec: 0.826	F1: 0.839	AER: 0.159
+seuil: 0.014	Prec: 0.864	Rec: 0.817	F1: 0.84	AER: 0.156
+seuil: 0.015	Prec: 0.876	Rec: 0.813	F1: 0.843	AER: 0.151
+seuil: 0.016	Prec: 0.886	Rec: 0.809	F1: 0.846	AER: 0.148
+seuil: 0.017	Prec: 0.895	Rec: 0.805	F1: 0.848	AER: 0.145
+seuil: 0.018	Prec: 0.901	Rec: 0.797	F1: 0.846	AER: 0.146
+seuil: 0.019	Prec: 0.91	Rec: 0.794	F1: 0.848	AER: 0.144
+seuil: 0.02	    Prec: 0.914	Rec: 0.789	F1: 0.847	AER: 0.145
+seuil: 0.021	Prec: 0.919	Rec: 0.781	F1: 0.844	AER: 0.146
+seuil: 0.022	Prec: 0.921	Rec: 0.775	F1: 0.842	AER: 0.148
+seuil: 0.023	Prec: 0.926	Rec: 0.77	F1: 0.841	AER: 0.149
+seuil: 0.024	Prec: 0.928	Rec: 0.763	F1: 0.837	AER: 0.152
+seuil: 0.025	Prec: 0.935	Rec: 0.755	F1: 0.835	AER: 0.153
+seuil: 0.026	Prec: 0.938	Rec: 0.748	F1: 0.832	AER: 0.156
+seuil: 0.027	Prec: 0.942	Rec: 0.745	F1: 0.832	AER: 0.156
+seuil: 0.028	Prec: 0.946	Rec: 0.743	F1: 0.832	AER: 0.156
+seuil: 0.029	Prec: 0.947	Rec: 0.738	F1: 0.83	AER: 0.158
+seuil: 0.03	    Prec: 0.952	Rec: 0.73	F1: 0.826	AER: 0.161
+norm	seuil: 0.0	    Prec: 0.669	Rec: 0.843	F1: 0.746	AER: 0.271
+norm	seuil: 0.01	    Prec: 0.707	Rec: 0.843	F1: 0.769	AER: 0.245
+norm	seuil: 0.02	    Prec: 0.761	Rec: 0.841	F1: 0.799	AER: 0.209
+norm	seuil: 0.03	    Prec: 0.81	Rec: 0.833	F1: 0.821	AER: 0.181
+norm	seuil: 0.04	    Prec: 0.845	Rec: 0.824	F1: 0.834	AER: 0.164
+norm	seuil: 0.05	    Prec: 0.88	Rec: 0.806	F1: 0.841	AER: 0.153
+norm	seuil: 0.06	    Prec: 0.901	Rec: 0.792	F1: 0.843	AER: 0.148
+norm	seuil: 0.061	Prec: 0.904	Rec: 0.789	F1: 0.843	AER: 0.148
+norm	seuil: 0.062	Prec: 0.906	Rec: 0.789	F1: 0.843	AER: 0.147
+norm	seuil: 0.063	Prec: 0.909	Rec: 0.789	F1: 0.845	AER: 0.146
+norm	seuil: 0.064	Prec: 0.91	Rec: 0.788	F1: 0.845	AER: 0.146
+norm	seuil: 0.065	Prec: 0.911	Rec: 0.787	F1: 0.844	AER: 0.146
+norm	seuil: 0.066	Prec: 0.913	Rec: 0.784	F1: 0.844	AER: 0.147
+norm	seuil: 0.067	Prec: 0.913	Rec: 0.783	F1: 0.843	AER: 0.147
+norm	seuil: 0.068	Prec: 0.916	Rec: 0.78	F1: 0.843	AER: 0.148
+norm	seuil: 0.069	Prec: 0.918	Rec: 0.778	F1: 0.842	AER: 0.148
+norm	seuil: 0.07	    Prec: 0.919	Rec: 0.776	F1: 0.841	AER: 0.149
+norm	seuil: 0.08	    Prec: 0.928	Rec: 0.759	F1: 0.835	AER: 0.154
