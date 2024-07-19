@@ -1,6 +1,7 @@
 from bs4 import BeautifulSoup
 from typing import Dict, List, Tuple, Union
 from collections import Counter
+from treelib import Node, Tree
 
 import numpy as np
 from scipy.stats import entropy
@@ -129,17 +130,18 @@ class SentenceAligner(object):
 		return cos_sim_fr/k,cos_sim_eng/k
 	
 	@staticmethod
-	def get_csls(X: np.ndarray, Y: np.ndarray, k: int, mean_cos_fr:np.ndarray, mean_cos_eng:np.ndarray) -> np.ndarray:
+	def get_csls(X: np.ndarray, Y: np.ndarray, k: int, cos_power:int, mean_cos_fr:np.ndarray, mean_cos_eng:np.ndarray) -> np.ndarray:
 		cos_mat = 2*cosine_similarity(X, Y)
 		mat_minus_fr = cos_mat - mean_cos_fr[:, np.newaxis]
 		mat_result = mat_minus_fr - mean_cos_eng
 		# normalized_chat =(mat_result+0.656)/(0.203+0.656) # xlrm
-		normalized_chat = (mat_result+0.9380217)/(0.6029104+0.9380217)	# bert min -0.9380217 max 0.6029104
-		return normalized_chat**6
+		# normalized_chat = (mat_result+0.9380217)/(0.6029104+0.9380217)	# bert min -0.9380217 max 0.6029104
+		normalized = (mat_result+1.0)/2.0
+		return normalized**cos_power
 	@staticmethod
 	def get_similarity(X: np.ndarray, Y: np.ndarray) -> np.ndarray:
-		return (cosine_similarity(X, Y) + 1.0) / 2.0
-	
+		# return (cosine_similarity(X, Y) + 1.0) / 2.0
+		return ((cosine_similarity(X, Y) + 1.0) / 2.0)
 	@staticmethod
 	def get_similarity_normalized_squared(X: np.ndarray, Y: np.ndarray) -> np.ndarray:
 		return ((cosine_similarity(X, Y) + 1.0) / 2.0)**2
@@ -153,31 +155,10 @@ class SentenceAligner(object):
 		return cosine_similarity(X,Y)**2
 	
 	@staticmethod
-	def get_similarity_cos_cubed(X: np.ndarray, Y: np.ndarray) -> np.ndarray:
-		return cosine_similarity(X, Y)**3
+	def get_similarity_cos_pow_n(X: np.ndarray, Y: np.ndarray, n: int) -> np.ndarray:
+		return cosine_similarity(X,Y)**n
 	
-	@staticmethod
-	def get_similarity_cos_pow4(X: np.ndarray, Y: np.ndarray) -> np.ndarray:
-		return cosine_similarity(X, Y)**4
-	
-	@staticmethod
-	def get_similarity_cos_pow5(X: np.ndarray, Y: np.ndarray) -> np.ndarray:
-		return cosine_similarity(X, Y)**5
-	@staticmethod
-	def get_similarity_cos_pow6(X: np.ndarray, Y: np.ndarray) -> np.ndarray:
-		return cosine_similarity(X, Y)**6
-	
-	@staticmethod
-	def get_similarity_cos_pow7(X: np.ndarray, Y: np.ndarray) -> np.ndarray:
-		return cosine_similarity(X, Y)**7
-	@staticmethod
-	def get_similarity_cos_pow8(X: np.ndarray, Y: np.ndarray) -> np.ndarray:
-		return cosine_similarity(X, Y)**8
-	
-	@staticmethod
-	def get_similarity_cos_pow10(X: np.ndarray, Y: np.ndarray) -> np.ndarray:
-		return cosine_similarity(X, Y)**10
-	
+
 	@staticmethod
 	def average_embeds_over_words(bpe_vectors: np.ndarray, word_tokens_pair: List[List[str]]) -> List[np.array]:
 		w2b_map = []
@@ -327,7 +308,7 @@ class SentenceAligner(object):
 			vectors = self.average_embeds_over_words(vectors, [l1_tokens, l2_tokens])
 		return vectors[0],vectors[1]
 
-	def get_similarity_matrix(self, src_sent, trg_sent):
+	def get_similarity_matrix(self, src_sent, trg_sent, cos_power):
 		if isinstance(src_sent, str):
 			src_sent = src_sent.split()
 		if isinstance(trg_sent, str):
@@ -350,7 +331,7 @@ class SentenceAligner(object):
 		if self.token_type == "word":
 			vectors = self.average_embeds_over_words(vectors, [l1_tokens, l2_tokens])
 
-		sim = self.get_similarity_cos_pow7(vectors[0], vectors[1])
+		sim = self.get_similarity_cos_pow_n(vectors[0], vectors[1], n=cos_power)
 		return sim
 
 def build_prefix_array(sim_array):
@@ -392,8 +373,9 @@ def cut(X,Y, X_bar, Y_bar,sim,prefix_array):
 	return W(X, Y_bar,sim,prefix_array)+W(X_bar, Y,sim,prefix_array)
 
 def Ncut(X, Y, X_bar, Y_bar,sim,prefix_array):
-	return cut(X,Y,X_bar, Y_bar,sim,prefix_array)/(cut(X,Y,X_bar, Y_bar,sim,prefix_array)+2*W(X,Y,sim,prefix_array))+cut(X_bar, Y_bar, X, Y,sim,prefix_array)/(cut(X_bar, Y_bar, X, Y,sim,prefix_array)+2*W(X_bar, Y_bar,sim,prefix_array))
-
+	return cut(X,Y,X_bar, Y_bar,sim,prefix_array)/(cut(X,Y,X_bar, Y_bar,sim,prefix_array)+2*W(X,Y,sim,prefix_array))+cut(X_bar, Y_bar, X, Y,sim,prefix_array)/(cut(X_bar, Y_bar, X, Y,sim,prefix_array)+2*W(X_bar, Y_bar,sim,prefix_array)) # Ncut1
+	# return cut(X,Y,X_bar, Y_bar,sim,prefix_array)/W(X,Y,sim,prefix_array)+cut(X,Y,X_bar, Y_bar,sim,prefix_array)/W(X_bar,Y_bar,sim,prefix_array) # Ncut2
+	# return cut(X,Y,X_bar, Y_bar,sim,prefix_array)/(W(X, Y,sim,prefix_array)+W(X,Y_bar,sim,prefix_array))+cut(X,Y,X_bar, Y_bar,sim,prefix_array)/(W(X,Y,sim,prefix_array)+W(X_bar,Y,sim,prefix_array)) # Ncut3
 def align(S,T, inner_seuil,sim,prefix_array,path_to_save):
 	# print("START ",S, T)
 	# with open(path_to_save, 'a+') as file:
@@ -404,19 +386,18 @@ def align(S,T, inner_seuil,sim,prefix_array,path_to_save):
 		# with open(path_to_save, 'a+') as file:
 			# print("END", word_s, word_t)
 			# file.write(f'{S[0]},{S[-1]}-{T[0]},{T[-1]} ')
-		# fr_lens.append(len(S))
-		# eng_lens.append(len(T))
+		fr_lens.append(len(S))
+		eng_lens.append(len(T))
 		for word_s in S:
 			for word_t in T:
 				if W([word_s],[word_t], sim,prefix_array)>inner_seuil: # inner seuil
 					with open(path_to_save, 'a+') as file:
 						# print("END", word_s, word_t)
 						file.write(f'{word_s}-{word_t} ')    # should the cases containing more than 1 word be saved as possible links?
-					# counter.append(1)
+					counter.append(1)
 		return S,T # terminate the procedure
 	
-	minNcut = 2
-	maxNcut = 0.5
+	minNcut = 10000
 	X,Y = S,T
 	# loop over the indices that are the potential cutting points
 	for i in range(1,len(S)):
@@ -434,35 +415,42 @@ def align(S,T, inner_seuil,sim,prefix_array,path_to_save):
 			if newNcut<minNcut:
 				minNcut = newNcut
 				X,Y = A, B_bar
-				X_bar, Y_bar = A_bar, B		
+				X_bar, Y_bar = A_bar, B	
+	# print(f'{X[0]},{X[-1]}-{Y[0]},{Y[-1]} | {X_bar[0]},{X_bar[-1]}-{Y_bar[0]},{Y_bar[-1]}')
+	# print(f'len fr: {X[-1]-X[0]}, {X_bar[-1]-X_bar[0]}')
 	align(X,Y, inner_seuil,sim,prefix_array,path_to_save)
 	align(X_bar, Y_bar,inner_seuil,sim,prefix_array,path_to_save)
-
 
 if __name__=='__main__':
 	ali_xml_paths = ["dat/xml_ali/LAuberge_TheInn.ali.xml", "dat/xml_ali/BarbeBleue_BlueBeard.ali.xml","dat/xml_ali/ChatBotte_MasterCat.ali.xml", "dat/xml_ali/Laderniereclasse_Thelastlesson.ali.xml", "dat/xml_ali/LaVision_TheVision.ali.xml"]
 	path = "dat/xml_ali/ChatBotte_MasterCat.ali.xml"
 	model = SentenceAligner(token_type='word')   # simalign class	# model="xlmr",
-	inner_seuil=0.014
+	inner_seuil=0.00
 	k=4
+	cos_power = 1
 	# for i,path in enumerate(ali_xml_paths):
 	# path_to_save = f'{i}_xlmr_sota.txt'
-	path_to_save = "chat_csls_forminmax.txt"
+	path_to_save = "chat_ronron.txt"
+	# leaf_path = 'leaf_spanaoh.txt'
+	# nonleaf_path = 'nonleaf_spanaoh.txt'
 	sentence_tuples = extract_sentences(path, is_path=True)
 	mins = []
 	maxs = []
 	fr_lens = []
 	eng_lens = []
 	counter = []
-	for num, tup in enumerate(sentence_tuples):
+	# all_trees=[]
+	slice_sentence_tuples=sentence_tuples[-1:]
+	for num, tup in enumerate(slice_sentence_tuples):
 		source_sentence, target_sentence = tup
 		# print(source_sentence, target_sentence)
-		print(num)
-		# sim = model.get_similarity_matrix(source_sentence, target_sentence)
-		vec1,vec2 = model.get_embeddings(source_sentence, target_sentence)
-		mean_cos_fr, mean_cos_eng = model.get_mean_similarity_to_neighbs(vec1,vec2, k=k)
-		sim = model.get_csls(vec1,vec2, k,mean_cos_fr, mean_cos_eng)
-		# print(sim)
+		# print(num)
+		sim = model.get_similarity_matrix(source_sentence, target_sentence, cos_power)
+		# print(sim1)
+		# vec1,vec2 = model.get_embeddings(source_sentence, target_sentence)
+		# mean_cos_fr, mean_cos_eng = model.get_mean_similarity_to_neighbs(vec1,vec2, k=k)
+		# sim = model.get_csls(vec1,vec2, k, cos_power,mean_cos_fr, mean_cos_eng)
+		print(sim)
 		maxs.append(np.max(sim))
 		mins.append(np.min(sim))
 		prefix_array = build_prefix_array(sim)
@@ -471,10 +459,12 @@ if __name__=='__main__':
 		#print(source, target)
 		with open(path_to_save, 'a+') as file:
 			file.write(f'{num}\t')
-		align(source, target, inner_seuil,sim,prefix_array)
+		align(source, target, inner_seuil,sim,prefix_array, path_to_save)
 		with open(path_to_save, 'a+') as file:
 			file.write('\n')
 	counter_fr = Counter(fr_lens)
 	counter_eng = Counter(eng_lens)
 	print("FR: ",counter_fr,"ENG: ", counter_eng, '\n', "nb of ali in generated file: ",len(counter))
-	print(min(mins), max(maxs))
+	print(maxs,mins)
+
+

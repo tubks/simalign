@@ -15,38 +15,43 @@ B_4                     Prec: 0.635     Rec: 0.828      F1: 0.719       AER: 0.3
 B_4_seuil_0.1           Prec: 0.69      Rec: 0.763      F1: 0.725       AER: 0.283
 B_4_seuil_0.1_inner     Prec: 0.802     Rec: 0.77       F1: 0.786       AER: 0.211
 
-Chat                    Prec: 0.555     Rec: 0.688      F1: 0.614       AER: 0.399
-Chat_Normalized_Squared Prec: 0.585     Rec: 0.731      F1: 0.65        AER: 0.364
-Chat_cos                Prec: 0.599     Rec: 0.747      F1: 0.665       AER: 0.35
-Chat_cos_seuil_05       Prec: 0.69      Rec: 0.725      F1: 0.707       AER: 0.296
-Chat_cos_squared        Prec: 0.629     Rec: 0.789      F1: 0.7         AER: 0.317
-Chat_cos_sq_seuil_05    Prec: 0.939     Rec: 0.548      F1: 0.692       AER: 0.294
-Chat_cubed              Prec: 0.65      Rec: 0.817      F1: 0.724       AER: 0.293
-Chat_4                  Prec: 0.666     Rec: 0.834      F1: 0.741       AER: 0.276
-Chat_4_seuil_0.1_outer  Prec: 0.718     Rec: 0.759      F1: 0.738       AER: 0.266
-Chat_4_seuil_0.1        Prec: 0.834     Rec: 0.77       F1: 0.801       AER: 0.194
+C                    Prec: 0.555     Rec: 0.688      F1: 0.614       AER: 0.399
+C_ncut2              Prec: 0.563     Rec: 0.7        F1: 0.624       AER: 0.39
+c_csls               Prec: 0.603     Rec: 0.753      F1: 0.67        AER: 0.345
+c_ncut2_csls         Prec: 0.568     Rec: 0.706      F1: 0.63        AER: 0.385
+C_Normalized_Squared Prec: 0.585     Rec: 0.731      F1: 0.65        AER: 0.364
+C_cos                Prec: 0.599     Rec: 0.747      F1: 0.665       AER: 0.35
+C_cos_seuil_05       Prec: 0.69      Rec: 0.725      F1: 0.707       AER: 0.296
+C_cos_squared        Prec: 0.629     Rec: 0.789      F1: 0.7         AER: 0.317
+C_cos_sq_seuil_05    Prec: 0.939     Rec: 0.548      F1: 0.692       AER: 0.294
+C_cubed              Prec: 0.65      Rec: 0.817      F1: 0.724       AER: 0.293
+C_4                  Prec: 0.666     Rec: 0.834      F1: 0.741       AER: 0.276
 
-Chat_6                  Prec: 0.658     Rec: 0.847      F1: 0.741       AER: 0.278
-Chat_6_seuil_0.03       Prec: 0.829     Rec: 0.787      F1: 0.807       AER: 0.189
-Chat_6_seuil_0.04       Prec: 0.86      Rec: 0.766      F1: 0.81        AER: 0.183
-Chat_6_seuil_0.05       Prec: 0.885     Rec: 0.744      F1: 0.808       AER: 0.181
-Chat_6_seuil_0.07       Prec: 0.913     Rec: 0.704      F1: 0.795       AER: 0.193
-chat_6_seuil_0.1        Prec: 0.937     Rec: 0.637      F1: 0.758       AER: 0.229
-chat_6_seuil_0.15       Prec: 0.947     Rec: 0.523      F1: 0.674       AER: 0.315
+C_4_seuil_0.1_outer  Prec: 0.718     Rec: 0.759      F1: 0.738       AER: 0.266
+C_4_seuil_0.1        Prec: 0.834     Rec: 0.77       F1: 0.801       AER: 0.194
 
-Chat_7                  Prec: 0.66      Rec: 0.851      F1: 0.743       AER: 0.275
-Chat_7_0.01             Prec: 0.773     Rec: 0.82       F1: 0.796       AER: 0.208
-Chat_7_0.02             Prec: 0.843     Rec: 0.783      F1: 0.812       AER: 0.184
+C_6                  Prec: 0.658     Rec: 0.847      F1: 0.741       AER: 0.278
+c_csls_6             Prec: 0.665     Rec: 0.841      F1: 0.743       AER: 0.275
 
-Chat_8                  Prec: 0.663     Rec: 0.846      F1: 0.743       AER: 0.275
-Chat_8_seuil_0.1        Prec: 0.898     Rec: 0.718      F1: 0.798       AER: 0.191
-Chat_8_seuil_0.05       Prec: 0.808     Rec: 0.795      F1: 0.801       AER: 0.197
-Chat_8_0.01             Prec: 0.839     Rec: 0.789      F1: 0.813       AER: 0.183
-Chat_10                 Prec: 0.657     Rec: 0.845      F1: 0.739       AER: 0.28
+C_6_seuil_0.03       Prec: 0.829     Rec: 0.787      F1: 0.807       AER: 0.189
+C_6_seuil_0.04       Prec: 0.86      Rec: 0.766      F1: 0.81        AER: 0.183
+C_6_seuil_0.05       Prec: 0.885     Rec: 0.744      F1: 0.808       AER: 0.181
+C_6_seuil_0.07       Prec: 0.913     Rec: 0.704      F1: 0.795       AER: 0.193
+c_6_seuil_0.1        Prec: 0.937     Rec: 0.637      F1: 0.758       AER: 0.229
+c_6_seuil_0.15       Prec: 0.947     Rec: 0.523      F1: 0.674       AER: 0.315
 
-chat_csls               Prec: 0.603     Rec: 0.753      F1: 0.67        AER: 0.345
+C_7                  Prec: 0.66      Rec: 0.851      F1: 0.743       AER: 0.275
+C_7_0.01             Prec: 0.773     Rec: 0.82       F1: 0.796       AER: 0.208
+C_7_0.02             Prec: 0.843     Rec: 0.783      F1: 0.812       AER: 0.184
+
+C_8                  Prec: 0.663     Rec: 0.846      F1: 0.743       AER: 0.275
+C_8_seuil_0.1        Prec: 0.898     Rec: 0.718      F1: 0.798       AER: 0.191
+C_8_seuil_0.05       Prec: 0.808     Rec: 0.795      F1: 0.801       AER: 0.197
+C_8_0.01             Prec: 0.839     Rec: 0.789      F1: 0.813       AER: 0.183
+C_10                 Prec: 0.657     Rec: 0.845      F1: 0.739       AER: 0.28
+
 c_csls_6                Prec: 0.665     Rec: 0.841      F1: 0.743       AER: 0.275
-c_csls_6_norm2          Prec: 0.662     Rec: 0.838      F1: 0.74        AER: 0.278
+c_csls_6_n2          Prec: 0.662     Rec: 0.838      F1: 0.74        AER: 0.278
 
 c_csls_6_001_k4_n2      Prec: 0.836     Rec: 0.826      F1: 0.831       AER: 0.168
 c_csls_6_002_k4_n2      Prec: 0.914     Rec: 0.789      F1: 0.847       AER: 0.145
@@ -62,8 +67,8 @@ c_csls_7_003_k4         Prec: 0.878     Rec: 0.813      F1: 0.844       AER: 0.1
 c_csls_7_004_k4         Prec: 0.91      Rec: 0.795      F1: 0.849       AER: 0.143
 c_csls_7_005_k4         Prec: 0.927     Rec: 0.772      F1: 0.842       AER: 0.148
 
-c_csls_7_01             Prec: 0.897     Rec: 0.794      F1: 0.842       AER: 0.15
 c_csls_7_009_k4         Prec: 0.839     Rec: 0.831      F1: 0.835       AER: 0.164
+c_csls_7_01             Prec: 0.897     Rec: 0.794      F1: 0.842       AER: 0.15
 c_csls_7_01_k4          Prec: 0.852     Rec: 0.826      F1: 0.839       AER: 0.159
 c_csls_7_012_k4         Prec: 0.881     Rec: 0.81       F1: 0.844       AER: 0.15
 

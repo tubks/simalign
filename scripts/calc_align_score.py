@@ -23,7 +23,7 @@ def load_gold(g_path):
 
 	return pros, surs, surs_count
 
-def calc_score(input_path, probs, surs, surs_count):
+def calc_score(input_path, probs, surs, surs_count,tp_fp=False):
 	total_hit = 0.
 	p_hit = 0.
 	s_hit = 0.
@@ -47,7 +47,8 @@ def calc_score(input_path, probs, surs, surs_count):
 	y_rec = round(s_hit / max(surs_count, 1.), 3)
 	y_f1 = round(2. * y_prec * y_rec / max((y_prec + y_rec), 0.01), 3)
 	aer = round(1 - (s_hit + p_hit) / (total_hit + surs_count), 3)
-
+	if tp_fp:
+		return y_prec, y_rec, y_f1, aer, p_hit, total_hit-p_hit
 	return y_prec, y_rec, y_f1, aer
 
 

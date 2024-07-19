@@ -8,7 +8,29 @@ import numpy as np
 from tqdm import tqdm
 import torch.nn.functional as F
 
+import os
+import logging
+from typing import Dict, List, Tuple, Union
+
+import numpy as np
+from scipy.stats import entropy
+from scipy.sparse import csr_matrix
+from sklearn.preprocessing import normalize
+from sklearn.metrics.pairwise import cosine_similarity
+try:
+	import networkx as nx
+	from networkx.algorithms.bipartite.matrix import from_biadjacency_matrix
+except ImportError:
+	nx = None
+import torch
+from transformers import BertModel, BertTokenizer, XLMModel, XLMTokenizer, RobertaModel, RobertaTokenizer, XLMRobertaModel, XLMRobertaTokenizer, AutoConfig, AutoModel, AutoTokenizer
+
 from simalign.simalign import *
+# from divisive_alignment import SentenceAligner, EmbeddingLoader
+
+# from simalign.utils import get_logger
+
+LOG = get_logger(__name__)
 
 
 def gather_null_aligns(sim_matrix: np.ndarray, inter_matrix: np.ndarray) -> List[float]:
@@ -166,7 +188,7 @@ if __name__ == "__main__":
 			else:
 				vectors = SentenceAligner.average_embeds_over_words(vectors, words_tokens[sent_id])
 				sim = SentenceAligner.get_similarity(vectors[0], vectors[1])
-
+				# print(sim)
 			all_mats = {}
 
 			sim = SentenceAligner.apply_distortion(sim, args.distortion)
